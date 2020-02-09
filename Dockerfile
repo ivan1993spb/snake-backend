@@ -1,6 +1,4 @@
-ARG IMAGE_BASE=python:3.6-alpine3.8
-
-FROM $IMAGE_BASE AS intermediate
+FROM python:3.8-alpine3.10
 
 ENV PYTHONUNBUFFERED=1 \
     LIBRARY_PATH=/lib:/usr/lib
@@ -20,4 +18,3 @@ WORKDIR /usr/local/app
 
 COPY lib lib
 COPY app.py ./
-
