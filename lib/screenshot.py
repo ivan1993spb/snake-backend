@@ -5,6 +5,7 @@ __license__ = "MIT"
 __docformat__ = 'reStructuredText'
 
 import math
+from typing import Tuple
 
 import numpy as np
 from PIL import Image
@@ -17,7 +18,7 @@ class Canvas:
     BLACK_COLOR = (0x0, 0x0, 0x0)
 
     @staticmethod
-    def _init_img(width, height, background_color=None):
+    def _init_img(width, height, background_color=None) -> np.ndarray:
         """Returns an image with given size and initial background color
 
         :param width: image width
@@ -68,7 +69,7 @@ class GridCanvas(Canvas):
         self._draw_border(border_color)
         self._draw_grid(grid_color)
 
-    def _calculate_grid_properties(self):
+    def _calculate_grid_properties(self) -> Tuple[int, int]:
         """Calculates grid properties: sizes of cell and line.
         """
         cell = min(
@@ -85,7 +86,7 @@ class GridCanvas(Canvas):
 
         return dot, line
 
-    def _calculate_img_size(self):
+    def _calculate_img_size(self) -> Tuple[int, int]:
         img_px_width = \
             self._dot * self._map_dot_width + \
             self._line * (self._map_dot_width + 1) + \
@@ -96,7 +97,7 @@ class GridCanvas(Canvas):
             self._border_size * 2
         return img_px_width, img_px_height
 
-    def _calculate_rect_px_x_y(self, dot_x, dot_y):
+    def _calculate_rect_px_x_y(self, dot_x, dot_y) -> Tuple[Tuple[int, int], Tuple[int, int]]:
         """Calculates a rectangle position on a canvas by given dot position.
         Returns coordinates of top left corner and right bottom corner of the
         rectangle.
@@ -137,11 +138,10 @@ class GridCanvas(Canvas):
                                    line_px_y + self._line,
                                    grid_color)
 
-    def _draw_border(self, border_color):
+    def _draw_border(self, border_color: Tuple[int, int, int]):
         """Draws borders of given color.
 
-        :param border_color: color tuple in RGB format
-        :type border_color: (int, int, int)
+        :param border_color: color in RGB format
         """
         if self._border_size > 0:
             # Western border
@@ -181,7 +181,7 @@ class GridCanvas(Canvas):
     def _draw_px_rect(self, x1, y1, x2, y2, color):
         self.img[y1:y2, x1:x2] = color
 
-    def size(self):
+    def size(self) -> Tuple[int, int]:
         """Returns the size of an image
 
         :return: width and height in px
@@ -238,7 +238,7 @@ class Screenshot:
             for (x, y), color in game_object.dots():
                 self._canvas.draw_dot(x, y, color)
 
-    def _rgb_image(self, strict_sized: bool):
+    def _rgb_image(self, strict_sized: bool) -> Image:
         if not strict_sized:
             return Image.fromarray(self._canvas.img, 'RGB')
 
@@ -246,12 +246,12 @@ class Screenshot:
         return Image.fromarray(self._canvas.img, 'RGB').resize((strict_width, strict_height))
 
     @property
-    def img(self):
+    def img(self) -> Image:
         """A result image
         """
         return self._image
 
-    def _calculate_strict_size(self):
+    def _calculate_strict_size(self) -> Tuple[int, int]:
         height, width, _ = self._canvas.img.shape
 
         max_length = min(self._max_img_px_width, self._max_img_px_height)
