@@ -42,7 +42,7 @@ class APIClient(Session):
 
     _DEFAULT_ERROR_MSG = 'undefined error'
 
-    def __init__(self, api_address: str, user_agent=None):
+    def __init__(self, api_address: str, user_agent: str = None):
         """
         :param api_address: an API address
         :param user_agent: user agent description to be sent to a server
@@ -56,7 +56,7 @@ class APIClient(Session):
 
         self.headers.update(self._initial_headers())
 
-    def _initial_headers(self):
+    def _initial_headers(self) -> CaseInsensitiveDict:
         """
         :return: returns a dictionary with additional headers
         :rtype: CaseInsensitiveDict
@@ -67,7 +67,7 @@ class APIClient(Session):
             'Accept': 'application/json',
         })
 
-    def get_games(self, limit=None, sorting=None):
+    def get_games(self, limit: int = None, sorting: str = None):
         """Returns information about ongoing games on a server
 
         :return: information about games
