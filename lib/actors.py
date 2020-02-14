@@ -7,10 +7,12 @@ __license__ = "MIT"
 __docformat__ = 'reStructuredText'
 
 import logging
+from typing import Tuple
 
 import dramatiq
 from dramatiq.brokers.redis import RedisBroker
 from dramatiq.brokers.stub import StubBroker
+from dramatiq.rate_limits import RateLimiterBackend
 from dramatiq.results.backends import (
     RedisBackend as ResultRedisBackend,
     StubBackend as ResultStubBackend,
@@ -31,6 +33,7 @@ from lib.api import APIError
 logger = logging.getLogger(__name__)
 logger.setLevel(settings.LOG_LEVEL)
 
+rate_limits_backend: RateLimiterBackend
 
 if settings.UNIT_TESTS:
     # Setup backends
@@ -55,13 +58,12 @@ DISTRIBUTED_MUTEX_REPORT = ConcurrentRateLimiter(rate_limits_backend, "distribut
 
 
 @dramatiq.actor(max_retries=0, store_results=True)
-def dispatch_taking_screenshots():
+def dispatch_taking_screenshots() -> dict:
     """Checks games on a specified in settings server and dispatches group of tasks
     for taking screenshots
 
     :return: a dictionary in which keys are game identifiers and values are lists
     of screenshot files
-    :rtype: dict
     """
     logger.debug('Dispatching taking games screenshots tasks')
     try:
@@ -84,7 +86,7 @@ def dispatch_taking_screenshots():
 
 
 @dramatiq.actor(max_retries=0, store_results=True)
-def take_sized_screenshots_by_game_id(game_id):
+def take_sized_screenshots_by_game_id(game_id) -> Tuple[int, list]:
     """Takes screenshots with regards to required sizes which are specified in
     settings
 
@@ -101,11 +103,11 @@ def take_sized_screenshots_by_game_id(game_id):
         logger.error('Parse error: %s', e)
     except APIError as e:
         logger.error('API response error: %s', e)
-    return game_id, None
+    return game_id, []
 
 
 @dramatiq.actor(max_retries=5)
-def write_games_screenshots_json_report(games_screenshots):
+def write_games_screenshots_json_report(games_screenshots: dict):
     """Writes a JSON report with given data. The output file name is specified
     in settings
 
@@ -122,6 +124,7 @@ def write_games_screenshots_json_report(games_screenshots):
 def delete_expired_screenshots_cache():
     """Deletes expired screenshot cache
     """
+    exclude_screenshots: tuple
     with DISTRIBUTED_MUTEX_REPORT.acquire():
         exclude_screenshots = funcs.get_latest_screenshots_file_names()
 
