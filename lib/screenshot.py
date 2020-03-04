@@ -1,33 +1,32 @@
 """The module contains a set of classes which provide generation of screenshots
 """
 
-__license__ = "MIT"
-__docformat__ = 'reStructuredText'
-
 import math
 from typing import Tuple
 
 import numpy as np
 from PIL import Image
 
+from lib.color import COLOR_RGB
+
 
 class Canvas:
     """A bare canvas
     """
 
-    BLACK_COLOR = (0x0, 0x0, 0x0)
+    BLACK_COLOR: COLOR_RGB = (0x0, 0x0, 0x0)
 
     @staticmethod
-    def _init_img(width, height, background_color=None) -> np.ndarray:
-        """Returns an image with given size and initial background color
+    def _init_img(width: int, height: int) -> np.ndarray:
+        """Returns an image with given size and initial background color.
 
-        :param width: image width
-        :param height: image height
-        :param background_color: initial background color
-        :return: image
+        Parameters:
+          width: image's width.
+          height: image's height.
+
+        Returns:
+          An empty black image.
         """
-        if background_color and background_color != Canvas.BLACK_COLOR:
-            return np.full((height, width, 3), background_color, dtype=np.uint8)
         return np.zeros((height, width, 3), dtype=np.uint8)
 
 
@@ -39,18 +38,24 @@ class GridCanvas(Canvas):
     LINE_SIZE_MIN = 1
     DOT_SIZE_MIN = 5
 
-    def __init__(self, map_dot_width, map_dot_height, max_img_px_width, max_img_px_height,
-                 border_size, border_color, grid_color, background_color=None):
+    def __init__(self,
+                 map_dot_width: int,
+                 map_dot_height: int,
+                 max_img_px_width: int,
+                 max_img_px_height: int,
+                 border_size: int,
+                 border_color: COLOR_RGB,
+                 grid_color: COLOR_RGB):
         """Initializes a GridCanvas instance.
 
-        :param map_dot_width: map width in dots
-        :param map_dot_height: map height in dots
-        :param max_img_px_width: limit result image width in px
-        :param max_img_px_height: limit result image height in px
-        :param border_size: border size in px
-        :param border_color: border color
-        :param grid_color: grid color
-        :param background_color: background color
+        Parameters:
+          map_dot_width: map width in dots.
+          map_dot_height: map height in dots.
+          max_img_px_width: limit result image width in px.
+          max_img_px_height: limit result image height in px.
+          border_size: border size in px.
+          border_color: border color.
+          grid_color: grid color.
         """
         self._map_dot_width = map_dot_width
         self._map_dot_height = map_dot_height
@@ -63,18 +68,26 @@ class GridCanvas(Canvas):
         self._img_px_width, self._img_px_height = self._calculate_img_size()
 
         self.img = self._init_img(self._img_px_width,
-                                  self._img_px_height,
-                                  background_color)
+                                  self._img_px_height)
 
-        self._draw_border(border_color)
+        self._draw_borders(border_color)
         self._draw_grid(grid_color)
 
     def _calculate_grid_properties(self) -> Tuple[int, int]:
         """Calculates grid properties: sizes of cell and line.
+
+        Returns:
+          Returns a tuple with dot length and grid line width both in px.
         """
         cell = min(
-            math.ceil((self._max_img_px_width - self._border_size * 2) / self._map_dot_width),
-            math.ceil((self._max_img_px_height - self._border_size * 2) / self._map_dot_height)
+            math.ceil(
+                (self._max_img_px_width - self._border_size * 2) /
+                self._map_dot_width
+            ),
+            math.ceil(
+                (self._max_img_px_height - self._border_size * 2) /
+                self._map_dot_height
+            )
         )
 
         line = math.floor(cell * self.LINE_SIZE_FACTOR)
@@ -97,26 +110,29 @@ class GridCanvas(Canvas):
             self._border_size * 2
         return img_px_width, img_px_height
 
-    def _calculate_rect_px_x_y(self, dot_x, dot_y) -> Tuple[Tuple[int, int], Tuple[int, int]]:
+    def _calculate_rect_px_x_y(self, dot_x: int, dot_y: int) \
+            -> Tuple[Tuple[int, int], Tuple[int, int]]:
         """Calculates a rectangle position on a canvas by given dot position.
         Returns coordinates of top left corner and right bottom corner of the
         rectangle.
 
-        :param dot_x: dot X
-        :param dot_y: dot Y
-        :rtype: ((int, int), (int, int))
+        Parameters:
+          dot_x: dot's X
+          dot_y: dot's Y
         """
-        px_x_1 = self._border_size + self._dot * dot_x + self._line * (dot_x + 1)
-        px_y_1 = self._border_size + self._dot * dot_y + self._line * (dot_y + 1)
+        px_x_1 = self._border_size + self._dot * \
+            dot_x + self._line * (dot_x + 1)
+        px_y_1 = self._border_size + self._dot * \
+            dot_y + self._line * (dot_y + 1)
         px_x_2 = px_x_1 + self._dot
         px_y_2 = px_y_1 + self._dot
         return (px_x_1, px_y_1), (px_x_2, px_y_2)
 
-    def _draw_grid(self, grid_color):
+    def _draw_grid(self, grid_color: COLOR_RGB):
         """Draws a grid of given color.
 
-        :param grid_color: color tuple in RGB format
-        :type grid_color: (int, int, int)
+        Parameters:
+          grid_color: color in RGB format.
         """
         if self._line > 0:
             # Horizontal
@@ -138,10 +154,11 @@ class GridCanvas(Canvas):
                                    line_px_y + self._line,
                                    grid_color)
 
-    def _draw_border(self, border_color: Tuple[int, int, int]):
+    def _draw_borders(self, border_color: COLOR_RGB):
         """Draws borders of given color.
 
-        :param border_color: color in RGB format
+        Parameters:
+          border_color: color in RGB format.
         """
         if self._border_size > 0:
             # Western border
@@ -172,50 +189,57 @@ class GridCanvas(Canvas):
                                self._img_px_height,
                                border_color)
 
-    def draw_dot(self, dot_x, dot_y, color):
+    def draw_dot(self, dot_x: int, dot_y: int, color: COLOR_RGB):
         """Draws a single dot.
         """
         (px_x_1, px_y_1), (px_x_2, px_y_2) = self._calculate_rect_px_x_y(dot_x, dot_y)
         self._draw_px_rect(px_x_1, px_y_1, px_x_2, px_y_2, color)
 
-    def _draw_px_rect(self, x1, y1, x2, y2, color):
+    def _draw_px_rect(self,
+                      x1: int, y1: int,
+                      x2: int, y2: int,
+                      color: COLOR_RGB):
         self.img[y1:y2, x1:x2] = color
 
     def size(self) -> Tuple[int, int]:
         """Returns the size of an image
 
-        :return: width and height in px
-        :rtype: (int, int)
+        Returns:
+          A tuple with width and height in px
         """
         return self._img_px_width, self._img_px_height
 
     def __repr__(self):
-        return '{}.{}(width={}, height={}, dot={}, line={})'.format(__name__,
-                                                                    self.__class__.__name__,
-                                                                    self._img_px_width,
-                                                                    self._img_px_height,
-                                                                    self._dot,
-                                                                    self._line)
+        return '{}.{}(width={}, height={}, dot={}, line={})'.format(
+            __name__,
+            self.__class__.__name__,
+            self._img_px_width,
+            self._img_px_height,
+            self._dot,
+            self._line)
 
 
 class Screenshot:
     """A game screenshot
     """
 
-    COLOR_BACKGROUND = (0x0, 0x0, 0x0)
+    COLOR_BACKGROUND: COLOR_RGB = (0x0, 0x0, 0x0)
     BORDER_SIZE = 2
-    COLOR_BORDER = (0x0, 0x11, 0x0)
-    COLOR_GRID = (0x0, 0x22, 0x0)
+    COLOR_BORDER: COLOR_RGB = (0x0, 0x11, 0x0)
+    COLOR_GRID: COLOR_RGB = (0x0, 0x22, 0x0)
 
-    def __init__(self, map_size, max_size, game_objects: list, strict_sized=False):
+    def __init__(self,
+                 map_size: Tuple[int, int],
+                 max_size: Tuple[int, int],
+                 game_objects: list,
+                 strict_sized: bool = False):
         """Initializes a screenshot.
 
-        :param map_size: size of map in dots
-        :type map_size: (int, int)
-        :param max_size: limits for result image in px
-        :type max_size: (int, int)
-        :param game_objects: list of game objects
-        :param strict_sized: a flag whether to generate an image with strict limited size or not
+        Parameters:
+          map_size: size of map in dots
+          max_size: limits for result image in px
+          game_objects: list of game objects
+          strict_sized: a flag whether to generate an image with strict limited size or not
         """
         self._map_dot_width, self._map_dot_height = map_size
         self._max_img_px_width, self._max_img_px_height = max_size
@@ -226,8 +250,7 @@ class Screenshot:
                                   self._max_img_px_height,
                                   self.BORDER_SIZE,
                                   self.COLOR_BORDER,
-                                  self.COLOR_GRID,
-                                  self.COLOR_BACKGROUND)
+                                  self.COLOR_GRID)
 
         self._draw_objects(game_objects)
 
@@ -243,7 +266,8 @@ class Screenshot:
             return Image.fromarray(self._canvas.img, 'RGB')
 
         strict_width, strict_height = self._calculate_strict_size()
-        return Image.fromarray(self._canvas.img, 'RGB').resize((strict_width, strict_height))
+        return Image.fromarray(self._canvas.img, 'RGB').resize(
+            (strict_width, strict_height))
 
     @property
     def img(self) -> Image:
@@ -265,9 +289,10 @@ class Screenshot:
         return width * max_length // height, max_length
 
     def __repr__(self):
-        return '{}.{}(dot_w={}, dot_h={}, max_px_w={}, max_px_h={})'.format(__name__,
-                                                                            self.__class__.__name__,
-                                                                            self._map_dot_width,
-                                                                            self._map_dot_height,
-                                                                            self._max_img_px_width,
-                                                                            self._max_img_px_height)
+        return '{}.{}(dot_w={}, dot_h={}, max_px_w={}, max_px_h={})'.format(
+            __name__,
+            self.__class__.__name__,
+            self._map_dot_width,
+            self._map_dot_height,
+            self._max_img_px_width,
+            self._max_img_px_height)

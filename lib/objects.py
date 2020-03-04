@@ -2,8 +2,10 @@
 initializing objects
 """
 
-__license__ = "MIT"
-__docformat__ = 'reStructuredText'
+from typing import Tuple, Generator, List
+
+from lib.color import COLOR_RGB
+
 
 OBJECT_TYPE_APPLE = 1
 OBJECT_TYPE_CORPSE = 2
@@ -14,22 +16,28 @@ OBJECT_TYPE_MOUSE = 6
 OBJECT_TYPE_UNKNOWN = 7
 
 
+DOT = Tuple[int, int]
+DOTS = List[DOT]
+
+
 class Object:
-    """Stub object"""
-    COLOR = (0x0, 0x0, 0x0)
+    """Stub object
+    """
+    COLOR: COLOR_RGB = (0x0, 0x0, 0x0)
 
-    def __init__(self, dots):
-        """Initializes an object with passed dots
+    def __init__(self, dots: DOTS):
+        """Initializes an object with passed dots.
 
-        :param dots: dots of an object
-        :type dots: list
+        Parameters:
+          dots: dots of an object
         """
         self._dots = dots
 
-    def dots(self):
+    def dots(self) -> Generator[Tuple[DOT, COLOR_RGB], None, None]:
         """Returns a generator with dots
 
-        :return: generator with tuples as items which contain dots and colors
+        Returns:
+          A generator with tuples as items which contain dots and colors.
         """
         for dot in self._dots:
             x, y = dot
@@ -37,31 +45,31 @@ class Object:
 
 
 class Apple(Object):
-    COLOR = (0x0, 0xff, 0x0)
+    COLOR: COLOR_RGB = (0x0, 0xff, 0x0)
 
 
 class Corpse(Object):
-    COLOR = (0x0, 0x0, 0xff)
+    COLOR: COLOR_RGB = (0x0, 0x0, 0xff)
 
 
 class Snake(Object):
-    COLOR = (0xff, 0x44, 0x44)
+    COLOR: COLOR_RGB = (0xff, 0x44, 0x44)
 
 
 class Wall(Object):
-    COLOR = (0x44, 0x77, 0x44)
+    COLOR: COLOR_RGB = (0x44, 0x77, 0x44)
 
 
 class Watermelon(Object):
-    COLOR = (0xf0, 0xff, 0x0)
+    COLOR: COLOR_RGB = (0xf0, 0xff, 0x0)
 
 
 class Mouse(Object):
-    COLOR = (0xff, 0x0, 0x0)
+    COLOR: COLOR_RGB = (0xff, 0x0, 0x0)
 
 
 class Unknown(Object):
-    COLOR = (0x66, 0x66, 0x66)
+    COLOR: COLOR_RGB = (0x66, 0x66, 0x66)
 
 
 class ObjectFactory:
@@ -79,13 +87,15 @@ class ObjectFactory:
     }
 
     @staticmethod
-    def create(object_type, dots):
+    def create(object_type: int, dots: DOTS):
         """Casts given object type with a class of the object and tries to create an
         object instance. If succeed, returns the object instance.
 
-        :param object_type: object type identifier
-        :param dots: list of dots
-        :type dots: list
-        :return: object of certain type
+        Parameters:
+          object_type: object type identifier
+          dots: list of dots
+
+        Returns:
+          Am object of certain type.
         """
         return ObjectFactory.__cast_object_types_classes[object_type](dots)

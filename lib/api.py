@@ -1,8 +1,7 @@
 """The module contains classes and methods to work with the API of the Snake-Server
 """
 
-__license__ = "MIT"
-__docformat__ = 'reStructuredText'
+from typing import Any, Tuple
 
 from requests.utils import CaseInsensitiveDict
 from requests import Session
@@ -21,11 +20,11 @@ class APIError(Exception):
     """Wraps an error which occurs in a process of request processing on server
     """
 
-    def __init__(self, status, text):
+    def __init__(self, status: int, text: str):
         """
-        :param status: a response status code
-        :type status: int
-        :param text: description of an error
+        Parameters:
+          status(int): a response status code
+          text(str): a description of an error
         """
         self.status = status
         self.text = text
@@ -44,8 +43,9 @@ class APIClient(Session):
 
     def __init__(self, api_address: str, user_agent: str = None):
         """
-        :param api_address: an API address
-        :param user_agent: user agent description to be sent to a server
+        Parameters:
+          api_address(str): an API address
+          user_agent(str): a user agent description to be sent to a server
         """
         assert api_address.endswith('/api'), 'API address must end with "/api"'
 
@@ -58,8 +58,8 @@ class APIClient(Session):
 
     def _initial_headers(self) -> CaseInsensitiveDict:
         """
-        :return: returns a dictionary with additional headers
-        :rtype: CaseInsensitiveDict
+        Returns:
+          A dictionary with additional headers.
         """
         return CaseInsensitiveDict({
             'User-Agent': self._user_agent,
@@ -67,10 +67,11 @@ class APIClient(Session):
             'Accept': 'application/json',
         })
 
-    def get_games(self, limit: int = None, sorting: str = None):
+    def get_games(self, limit: int = None, sorting: str = None) -> Any:
         """Returns information about ongoing games on a server
 
-        :return: information about games
+        Returns:
+          information about games.
         """
         params = {}
         if limit:
@@ -80,35 +81,39 @@ class APIClient(Session):
             params[_PARAM_LABEL_SORTING] = sorting
         return self._call('GET', 'games', params=params)
 
-    def get_game(self, game_id: int):
+    def get_game(self, game_id: int) -> Any:
         """Returns information about a game with specified game identifier
 
-        :param game_id: game identifier
+        Parameters:
+          game_id: a game identifier.
         """
         return self._call('GET', 'games', str(game_id))
 
-    def get_game_objects(self, game_id: int):
+    def get_game_objects(self, game_id: int) -> Any:
         """Returns information about game objects placed on a game map.
 
-        :param game_id: game identifier
-        :return: information about objects
+        Parameters:
+          game_id: a game identifier.
         """
         return self._call('GET', 'games', str(game_id), 'objects')
 
-    def delete_game(self, game_id: int):
+    def delete_game(self, game_id: int) -> Any:
         """Sends a request for deleting a game
 
-        :param game_id: game identifier
+        Parameters:
+          game_id: a game identifier.
         """
         return self._call('DELETE', 'games', str(game_id))
 
-    def create_game(self, limit: int, width: int, height: int, enable_walls=True):
+    def create_game(self, limit: int, width: int, height: int,
+                    enable_walls: bool = True) -> Any:
         """Sends a request to create a game with given parameters.
 
-        :param limit: players limit
-        :param width: map width
-        :param height: map height
-        :param enable_walls: flag whether to add walls or not
+        Parameters:
+          limit: players limit.
+          width: map width.
+          height: map height.
+          enable_walls: flag whether to add walls or not.
         """
         return self._call('POST', 'games', data={
             'limit': limit,
@@ -117,41 +122,46 @@ class APIClient(Session):
             'enable_walls': enable_walls,
         })
 
-    def broadcast(self, game_id: int, message: str):
+    def broadcast(self, game_id: int, message: str) -> Any:
         return self._call('POST', 'games', str(game_id), 'broadcast', data={
             'message': message,
         })
 
-    def capacity(self):
+    def capacity(self) -> Any:
         """Sends a request to retrieve information about server current capacity
         """
         return self._call('GET', 'capacity')
 
-    def info(self):
+    def info(self) -> Any:
         """Sends a request to retrieve information about server
         """
         return self._call('GET', 'info')
 
-    def ping(self):
-        """Sends ping request"""
+    def ping(self) -> Any:
+        """Sends ping request
+        """
         return self._call('GET', 'ping')
 
-    def _url(self, url):
-        return '/'.join((self._api_address,) + url)
+    def _mk_url(self, url_parts: Tuple[str, ...]):
+        return '/'.join((self._api_address,) + url_parts)
 
-    def _call(self, method: str, *url, data=None, params=None, stream=None):
+    def _call(self, method: str, *url_parts, data=None,
+              params=None, stream=None) -> Any:
         """Sends a request with given method, url, data, params to the specified
         server address.
 
-        :param method: request method
-        :param url: request URL
-        :param data: data to be sent
-        :param params: params to be sent
-        :param stream: flag
-        :raises: APIError
+        Parameters:
+          method: a request method
+          url_parts: request URL parts
+          data: data to be sent
+          params: params to be sent
+          stream: flag
+
+        Raises:
+          APIError: when something wrong with a response.
         """
         response = self.request(method.upper(),
-                                self._url(url),
+                                self._mk_url(url_parts),
                                 params=params,
                                 data=data,
                                 stream=stream)
@@ -160,15 +170,23 @@ class APIClient(Session):
             self._raise_error(response.status_code, result)
         return result
 
-    def _raise_error(self, status, result):
+    def _raise_error(self, status: int, result: dict):
         """Raises an error with given status and data.
 
-        :param status: response status
-        :raises: APIError
+        Parameters:
+          status: a response status
+          result: a parsed response result
+        Raises:
+          APIError: always raises that exception.
         """
         raise APIError(status, self._get_error_text(result))
 
-    def _get_error_text(self, result):
+    def _get_error_text(self, result: dict) -> str:
+        """Returns an error text.
+
+        Parameters:
+          result: a result dictionary.
+        """
         # TODO: Create an error parser.
         try:
             return result[self._FIELD_TEXT]

@@ -1,9 +1,6 @@
 """Settings module
 """
 
-__license__ = "MIT"
-__docformat__ = 'reStructuredText'
-
 from environs import Env
 
 
@@ -18,7 +15,9 @@ LOG_LEVEL = env.log_level('LOG_LEVEL', 'INFO')
 
 BROKER_REDIS_URL = env('BROKER_REDIS_URL', 'redis://127.0.0.1:6379/0')
 RESULT_REDIS_URL = env('RESULT_REDIS_URL', 'redis://127.0.0.1:6379/1')
-RATE_LIMITS_REDIS_URL = env('RATE_LIMITS_REDIS_URL', 'redis://127.0.0.1:6379/2')
+RATE_LIMITS_REDIS_URL = env(
+    'RATE_LIMITS_REDIS_URL',
+    'redis://127.0.0.1:6379/2')
 
 SNAKE_API_ADDRESS = env('SNAKE_API_ADDRESS', 'http://localhost:8080/api')
 CLIENT_NAME = env('CLIENT_NAME', 'SnakeCLIClient')

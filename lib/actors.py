@@ -3,11 +3,8 @@ provide some necessary operations with the Snake-Server such as screenshot gener
 and so on.
 """
 
-__license__ = "MIT"
-__docformat__ = 'reStructuredText'
-
 import logging
-from typing import Tuple
+from typing import Tuple, Dict, List
 
 import dramatiq
 from dramatiq.brokers.redis import RedisBroker
@@ -47,28 +44,32 @@ else:
     logger.info("Setup redis broker")
     # Setup backends
     result_backend = ResultRedisBackend(url=settings.RESULT_REDIS_URL)
-    rate_limits_backend = RateLimitsRedisBackend(url=settings.RATE_LIMITS_REDIS_URL)
+    rate_limits_backend = RateLimitsRedisBackend(
+        url=settings.RATE_LIMITS_REDIS_URL)
     # Setup brokers
     broker = RedisBroker(url=settings.BROKER_REDIS_URL)
     broker.add_middleware(Results(backend=result_backend))
     dramatiq.set_broker(broker=broker)
 
 
-DISTRIBUTED_MUTEX_REPORT = ConcurrentRateLimiter(rate_limits_backend, "distributed-mutex-report", limit=1)
+DISTRIBUTED_MUTEX_REPORT = ConcurrentRateLimiter(rate_limits_backend,
+                                                 "distributed-mutex-report",
+                                                 limit=1)
 
 
 @dramatiq.actor(max_retries=0, store_results=True)
-def dispatch_taking_screenshots() -> dict:
+def dispatch_taking_screenshots() -> Dict[int, List[str]]:
     """Checks games on a specified in settings server and dispatches group of tasks
     for taking screenshots
 
-    :return: a dictionary in which keys are game identifiers and values are lists
-    of screenshot files
+    Returns:
+      A dictionary in which keys are game identifiers and values are lists
+      of screenshot files
     """
     logger.debug('Dispatching taking games screenshots tasks')
     try:
-        group = dramatiq.group(take_sized_screenshots_by_game_id.message(game_id)
-                               for game_id in funcs.get_games_ids())
+        group = dramatiq.group(take_sized_screenshots_by_game_id.message(
+            game_id) for game_id in funcs.get_games_ids())
         group.run()
         # Dictionary to collect game identifiers as keys and screenshot file name
         # lists as values for report
@@ -86,14 +87,15 @@ def dispatch_taking_screenshots() -> dict:
 
 
 @dramatiq.actor(max_retries=0, store_results=True)
-def take_sized_screenshots_by_game_id(game_id) -> Tuple[int, list]:
+def take_sized_screenshots_by_game_id(game_id: int) -> Tuple[int, list]:
     """Takes screenshots with regards to required sizes which are specified in
-    settings
+    settings.
 
-    :param game_id: a game identifier
-    :type game_id: int
-    :return: a tuple with a game identifier and a list of screenshot files
-    :rtype: (int, list)
+    Parameters:
+      game_id: a game identifier
+
+    Returns:
+      A tuple with a game identifier and a list of screenshot files
     """
     logger.debug('Taking screenshots: %s', game_id)
     try:
@@ -107,12 +109,13 @@ def take_sized_screenshots_by_game_id(game_id) -> Tuple[int, list]:
 
 
 @dramatiq.actor(max_retries=5)
-def write_games_screenshots_json_report(games_screenshots: dict):
+def write_games_screenshots_json_report(
+        games_screenshots: Dict[int, List[str]]):
     """Writes a JSON report with given data. The output file name is specified
     in settings
 
-    :param games_screenshots: a data to be written as a report
-    :type games_screenshots: dict
+    Parameters:
+      games_screenshots: a data to be written as a report
     """
     if games_screenshots:
         logger.debug('Report games: %s', games_screenshots)

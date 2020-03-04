@@ -1,9 +1,6 @@
 """The application's entrypoint
 """
 
-__license__ = "MIT"
-__docformat__ = 'reStructuredText'
-
 import logging
 import pathlib
 
@@ -25,7 +22,9 @@ logger.setLevel(settings.LOG_LEVEL)
 
 
 def init():
-    pathlib.Path(settings.SCREENSHOT_DEST_PATH).mkdir(parents=True, exist_ok=True)
+    pathlib.Path(settings.SCREENSHOT_DEST_PATH).mkdir(
+        parents=True,
+        exist_ok=True)
 
 
 def run_scheduler():

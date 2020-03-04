@@ -1,8 +1,7 @@
 """The module contains classes to parse server responses
 """
 
-__license__ = "MIT"
-__docformat__ = 'reStructuredText'
+from typing import Tuple, Generator
 
 from lib.objects import (
     OBJECT_TYPE_APPLE,
@@ -48,16 +47,19 @@ class ObjectParser:
     }
 
     @staticmethod
-    def parse(raw_object: dict):
+    def parse(raw_object: dict) -> Tuple[int, list]:
         """Parses raw object dictionary and returns object type and dots
 
-        :param raw_object: raw object entity
-        :return: object type identifier and dots
-        :rtype: (int, list)
+        Parameters:
+          raw_object: raw object entity
+
+        Returns:
+          An object type identifier and it's dots.
         """
         try:
             object_type_label = raw_object[ObjectParser.FIELD_LABEL_TYPE]
-            object_type = ObjectParser.__cast_object_labels_object_types.get(object_type_label, OBJECT_TYPE_UNKNOWN)
+            object_type = ObjectParser.__cast_object_labels_object_types.get(
+                object_type_label, OBJECT_TYPE_UNKNOWN)
 
             if ObjectParser.FIELD_LABEL_DOT in raw_object:
                 return object_type, [raw_object[ObjectParser.FIELD_LABEL_DOT]]
@@ -82,12 +84,14 @@ class MapSizeParser:
     LABEL_HEIGHT = 'height'
 
     @staticmethod
-    def parse(raw_map_size: dict):
+    def parse(raw_map_size: dict) -> Tuple[int, int]:
         """Parses raw map size entity and returns a tuple with width and height
 
-        :param raw_map_size: raw map size entity
-        :return: width and height of a map
-        :rtype: (int, int)
+        Parameters:
+          raw_map_size: raw map size entity
+
+        Returns:
+          width and height of a map
         """
         try:
             return (
@@ -106,11 +110,14 @@ class GamesParser:
     LABEL_GAME_ID = 'id'
 
     @staticmethod
-    def parse(raw_games: dict):
-        """Parses raw game entity and returns a generator with game identifiers
+    def parse(raw_games: dict) -> Generator[int, None, None]:
+        """Parses raw game entity and returns a generator with game identifiers.
 
-        :param raw_games: raw games entity
-        :return: a generator with game identifiers
+        Parameters:
+          raw_games: raw games entity.
+
+        Returns:
+          A generator with game identifiers.
         """
         for game in raw_games[GamesParser.LABEL_GAMES]:
             yield game[GamesParser.LABEL_GAME_ID]
@@ -128,13 +135,15 @@ class ObjectsParser:
     LABEL_MAP = 'map'
 
     @staticmethod
-    def parse(raw_objects: dict):
+    def parse(raw_objects: dict) -> Tuple[dict, dict]:
         """Parses a raw objects response and splits it in two entities with raw map info
         and raw objects info.
 
-        :param raw_objects: a raw objects response
-        :return: raw map entity and raw objects entity
-        :rtype: (dict, dict)
+        Parameters:
+          raw_objects: a raw objects response
+
+        Returns:
+          A raw map entity and a raw objects entity
         """
         try:
             return (
