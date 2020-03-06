@@ -1,4 +1,5 @@
-"""The module contains a set of classes which provide generation of screenshots
+"""The module contains a set of classes which provide generation of
+screenshots.
 """
 
 import math
@@ -112,9 +113,9 @@ class GridCanvas(Canvas):
 
     def _calculate_rect_px_x_y(self, dot_x: int, dot_y: int) \
             -> Tuple[Tuple[int, int], Tuple[int, int]]:
-        """Calculates a rectangle position on a canvas by given dot position.
-        Returns coordinates of top left corner and right bottom corner of the
-        rectangle.
+        """Calculates a rectangle position on a canvas by given dot
+        position. Returns coordinates of top left corner and right bottom
+        corner of the rectangle.
 
         Parameters:
           dot_x: dot's X
@@ -192,7 +193,10 @@ class GridCanvas(Canvas):
     def draw_dot(self, dot_x: int, dot_y: int, color: COLOR_RGB):
         """Draws a single dot.
         """
-        (px_x_1, px_y_1), (px_x_2, px_y_2) = self._calculate_rect_px_x_y(dot_x, dot_y)
+        (px_x_1, px_y_1), (px_x_2, px_y_2) = self._calculate_rect_px_x_y(
+            dot_x,
+            dot_y,
+        )
         self._draw_px_rect(px_x_1, px_y_1, px_x_2, px_y_2, color)
 
     def _draw_px_rect(self,
@@ -202,7 +206,7 @@ class GridCanvas(Canvas):
         self.img[y1:y2, x1:x2] = color
 
     def size(self) -> Tuple[int, int]:
-        """Returns the size of an image
+        """Returns the size of an image.
 
         Returns:
           A tuple with width and height in px
@@ -220,7 +224,7 @@ class GridCanvas(Canvas):
 
 
 class Screenshot:
-    """A game screenshot
+    """A game screenshot.
     """
 
     COLOR_BACKGROUND: COLOR_RGB = (0x0, 0x0, 0x0)
@@ -239,7 +243,8 @@ class Screenshot:
           map_size: size of map in dots
           max_size: limits for result image in px
           game_objects: list of game objects
-          strict_sized: a flag whether to generate an image with strict limited size or not
+          strict_sized: a flag whether to generate an image with strict
+            limited size or not
         """
         self._map_dot_width, self._map_dot_height = map_size
         self._max_img_px_width, self._max_img_px_height = max_size

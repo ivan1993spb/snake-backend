@@ -1,4 +1,4 @@
-"""The module contains classes to parse server responses
+"""The module contains classes to parse server responses.
 """
 
 from typing import Tuple, Generator
@@ -85,7 +85,8 @@ class MapSizeParser:
 
     @staticmethod
     def parse(raw_map_size: dict) -> Tuple[int, int]:
-        """Parses raw map size entity and returns a tuple with width and height
+        """Parses raw map size entity and returns a tuple with width and
+        height.
 
         Parameters:
           raw_map_size: raw map size entity
@@ -111,7 +112,8 @@ class GamesParser:
 
     @staticmethod
     def parse(raw_games: dict) -> Generator[int, None, None]:
-        """Parses raw game entity and returns a generator with game identifiers.
+        """Parses raw game entity and returns a generator with game
+        identifiers.
 
         Parameters:
           raw_games: raw games entity.
@@ -128,7 +130,8 @@ class ParseObjectsError(ParseError):
 
 
 class ObjectsParser:
-    """Splits a raw objects response for raw map entity and raw objects entity.
+    """Splits a raw objects response for raw map entity and raw objects
+    entity.
     """
 
     LABEL_OBJECTS = 'objects'
@@ -136,8 +139,8 @@ class ObjectsParser:
 
     @staticmethod
     def parse(raw_objects: dict) -> Tuple[dict, dict]:
-        """Parses a raw objects response and splits it in two entities with raw map info
-        and raw objects info.
+        """Parses a raw objects response and splits it in two entities
+        with raw map info and raw objects info.
 
         Parameters:
           raw_objects: a raw objects response

@@ -1,5 +1,5 @@
 """The module contains a set of functions which provides the operations with
-the Snake-Server instance
+the Snake-Server instance.
 """
 
 import os
@@ -68,7 +68,8 @@ def generate_screenshot_image(map_size: Tuple[int, int],
       map_size: size of map in dots
       max_size: limits for result image in px
       objects: list of game objects
-      strict_sized: a flag whether to generate an image with strict limited size or not
+      strict_sized: a flag whether to generate an image with strict limited
+        size or not
 
     Returns:
       An image instance.
@@ -112,14 +113,16 @@ def save_objects_as_screenshot(path: str,
       max_size: limits for result image in px
       objects: list of game objects
       quality: quality
-      strict_sized: a flag whether to generate an image with strict limited size or not
+      strict_sized: a flag whether to generate an image with strict limited
+        size or not
     """
     img = generate_screenshot_image(map_size, max_size, objects, strict_sized)
     img.save(path, quality=quality, optimize=True)
 
 
 def take_sized_screenshots_by_game_id(game_id: int) -> List[str]:
-    """Takes a screenshot for a game with given game identifier and returns list of file names.
+    """Takes a screenshot for a game with given game identifier and returns
+    list of file names.
 
     Parameters:
       game_id: a game identifier.
@@ -153,7 +156,8 @@ def write_games_screenshots_json_report(
     """Writes a JSON report.
 
     Parameters:
-      games_screenshots: a report object to be JSON encoded and written in file.
+      games_screenshots: a report object to be JSON encoded and written in
+        file.
     """
     if games_screenshots:
         with open(get_json_report_path(), 'w') as fp:

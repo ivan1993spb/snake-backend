@@ -17,7 +17,8 @@ BROKER_REDIS_URL = env('BROKER_REDIS_URL', 'redis://127.0.0.1:6379/0')
 RESULT_REDIS_URL = env('RESULT_REDIS_URL', 'redis://127.0.0.1:6379/1')
 RATE_LIMITS_REDIS_URL = env(
     'RATE_LIMITS_REDIS_URL',
-    'redis://127.0.0.1:6379/2')
+    'redis://127.0.0.1:6379/2',
+)
 
 SNAKE_API_ADDRESS = env('SNAKE_API_ADDRESS', 'http://localhost:8080/api')
 CLIENT_NAME = env('CLIENT_NAME', 'SnakeCLIClient')

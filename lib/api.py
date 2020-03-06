@@ -1,4 +1,5 @@
-"""The module contains classes and methods to work with the API of the Snake-Server
+"""The module contains classes and methods to work with the API of
+the Snake-Server.
 """
 
 from typing import Any, Tuple
@@ -17,7 +18,8 @@ _SORTING = (SORTING_SMART, SORTING_RANDOM)
 
 
 class APIError(Exception):
-    """Wraps an error which occurs in a process of request processing on server
+    """Wraps an error which occurs in a process of request processing on
+    server.
     """
 
     def __init__(self, status: int, text: str):
@@ -68,7 +70,7 @@ class APIClient(Session):
         })
 
     def get_games(self, limit: int = None, sorting: str = None) -> Any:
-        """Returns information about ongoing games on a server
+        """Returns information about ongoing games on a server.
 
         Returns:
           information about games.
@@ -82,7 +84,7 @@ class APIClient(Session):
         return self._call('GET', 'games', params=params)
 
     def get_game(self, game_id: int) -> Any:
-        """Returns information about a game with specified game identifier
+        """Returns information about a game with specified game identifier.
 
         Parameters:
           game_id: a game identifier.
@@ -98,7 +100,7 @@ class APIClient(Session):
         return self._call('GET', 'games', str(game_id), 'objects')
 
     def delete_game(self, game_id: int) -> Any:
-        """Sends a request for deleting a game
+        """Sends a request for deleting a game.
 
         Parameters:
           game_id: a game identifier.
@@ -128,7 +130,8 @@ class APIClient(Session):
         })
 
     def capacity(self) -> Any:
-        """Sends a request to retrieve information about server current capacity
+        """Sends a request to retrieve information about server current
+        capacity.
         """
         return self._call('GET', 'capacity')
 
@@ -147,8 +150,8 @@ class APIClient(Session):
 
     def _call(self, method: str, *url_parts, data=None,
               params=None, stream=None) -> Any:
-        """Sends a request with given method, url, data, params to the specified
-        server address.
+        """Sends a request with given method, url, data, params to the
+        specified server address.
 
         Parameters:
           method: a request method

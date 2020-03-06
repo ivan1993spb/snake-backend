@@ -1,5 +1,5 @@
 """The module specifies objects which could be placed on a map, class-factory
-initializing objects
+initializing objects.
 """
 
 from typing import Tuple, Generator, List
@@ -88,8 +88,8 @@ class ObjectFactory:
 
     @staticmethod
     def create(object_type: int, dots: DOTS):
-        """Casts given object type with a class of the object and tries to create an
-        object instance. If succeed, returns the object instance.
+        """Casts given object type with a class of the object and tries to
+        create an object instance. If succeed, returns the object instance.
 
         Parameters:
           object_type: object type identifier

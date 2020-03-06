@@ -1,6 +1,6 @@
-"""The module contains a number of actors to be executed by a schedule. The actors
-provide some necessary operations with the Snake-Server such as screenshot generation
-and so on.
+"""The module contains a number of actors to be executed by a schedule. The
+actors provide some necessary operations with the Snake-Server such as
+screenshot generation and so on.
 """
 
 import logging
@@ -59,8 +59,8 @@ DISTRIBUTED_MUTEX_REPORT = ConcurrentRateLimiter(rate_limits_backend,
 
 @dramatiq.actor(max_retries=0, store_results=True)
 def dispatch_taking_screenshots() -> Dict[int, List[str]]:
-    """Checks games on a specified in settings server and dispatches group of tasks
-    for taking screenshots
+    """Checks games on a specified in settings server and dispatches group of
+    tasks for taking screenshots
 
     Returns:
       A dictionary in which keys are game identifiers and values are lists
@@ -71,8 +71,8 @@ def dispatch_taking_screenshots() -> Dict[int, List[str]]:
         group = dramatiq.group(take_sized_screenshots_by_game_id.message(
             game_id) for game_id in funcs.get_games_ids())
         group.run()
-        # Dictionary to collect game identifiers as keys and screenshot file name
-        # lists as values for report
+        # Dictionary to collect game identifiers as keys and screenshot file
+        # name lists as values for report
         games_screenshots = {}
         for game_id, files in group.get_results(block=True):
             if files:
