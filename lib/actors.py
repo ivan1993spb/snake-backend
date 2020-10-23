@@ -19,7 +19,8 @@ from dramatiq.rate_limits.backends import (
     RedisBackend as RateLimitsRedisBackend,
     StubBackend as RateLimitsStubBackend,
 )
-from dramatiq.results import Results
+from dramatiq.results import Results, ResultBackend
+from dramatiq.middleware import Prometheus
 
 from lib import settings
 from lib import funcs
@@ -31,6 +32,8 @@ logger = logging.getLogger(__name__)
 logger.setLevel(settings.LOG_LEVEL)
 
 rate_limits_backend: RateLimiterBackend
+broker: dramatiq.Broker
+result_backend: ResultBackend
 
 if settings.UNIT_TESTS:
     # Setup backends
@@ -38,8 +41,6 @@ if settings.UNIT_TESTS:
     rate_limits_backend = RateLimitsStubBackend()
     # Setup brokers
     broker = StubBroker()
-    broker.add_middleware(Results(backend=result_backend))
-    dramatiq.set_broker(broker)
 else:
     logger.info("Setup redis broker")
     # Setup backends
@@ -48,8 +49,17 @@ else:
         url=settings.RATE_LIMITS_REDIS_URL)
     # Setup brokers
     broker = RedisBroker(url=settings.BROKER_REDIS_URL)
-    broker.add_middleware(Results(backend=result_backend))
-    dramatiq.set_broker(broker=broker)
+
+results = Results(backend=result_backend)
+broker.add_middleware(results)
+
+if settings.PROMETHEUS_METRICS_SERVER_ENABLE:
+    broker.add_middleware(Prometheus(
+        http_host=settings.PROMETHEUS_METRICS_LISTEN_HOST,
+        http_port=settings.PROMETHEUS_METRICS_LISTEN_PORT,
+    ))
+
+dramatiq.set_broker(broker=broker)
 
 
 DISTRIBUTED_MUTEX_REPORT = ConcurrentRateLimiter(rate_limits_backend,
