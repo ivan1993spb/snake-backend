@@ -220,10 +220,6 @@ def create_game(limit: int, width: int, height: int,
 
 def sort_games(games: List[Game]) -> List[Game]:
     """Function sorts games
-
-    Raises:
-      APIError: when Rest API has returned an error.
-      ValidationError: when server's response was invalid
     """
     # TODO: try to come up with a more efficient implementation
     empty_games = filter(lambda game: game.is_empty(), games)
