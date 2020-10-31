@@ -42,13 +42,6 @@ def show(update, context):
     send_game_to_telegram.send(update.message.chat.id, game_id)
 
 
-def catify(update, context):
-    user = update.message.from_user
-    update.message.reply_photo(open('output/screenshots/g11s43x22-small.jpeg', 'rb'), quote=True)
-    update.message.reply_text("I'm working on it...")
-    logger.info(f'Photo received from {user.first_name} {user.last_name}')
-
-
 def delete(update, context):
     print('delete', update.message.text)
     _, game_id_str = update.message.text.split('_')
@@ -71,7 +64,6 @@ def main():
     # Define command handlers
     dp.add_handler(CommandHandler('start', start))
     dp.add_handler(CommandHandler('help', help))
-    dp.add_handler(CommandHandler('test', catify))
     dp.add_handler(CommandHandler('list', list_games))
     dp.add_handler(MessageHandler(Filters.regex(r'^/show_[\d]+$'), show))
     dp.add_handler(MessageHandler(Filters.regex(r'^/delete_[\d]+$'), delete))
