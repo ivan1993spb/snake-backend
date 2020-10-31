@@ -5,6 +5,7 @@ screenshot generation and so on.
 
 import logging
 from typing import Tuple, Dict, List
+from pathlib import Path
 
 import dramatiq
 from dramatiq.brokers.redis import RedisBroker
@@ -21,6 +22,7 @@ from dramatiq.rate_limits.backends import (
 )
 from dramatiq.results import Results, ResultBackend
 from dramatiq.middleware import Prometheus
+import telegram
 
 from lib import settings
 from lib import funcs
@@ -65,6 +67,8 @@ dramatiq.set_broker(broker=broker)
 DISTRIBUTED_MUTEX_REPORT = ConcurrentRateLimiter(rate_limits_backend,
                                                  "distributed-mutex-report",
                                                  limit=1)
+
+bot = telegram.Bot(token=settings.TELEGRAM_TOKEN)
 
 
 @dramatiq.actor(max_retries=0, store_results=True)
@@ -142,3 +146,55 @@ def delete_expired_screenshots_cache():
         exclude_screenshots = funcs.get_latest_screenshots_file_names()
 
     funcs.delete_screenshots(exclude_screenshots)
+
+
+@dramatiq.actor(max_retries=5)
+def send_games_list_to_telegram(chat_id, *args):
+    """Sends a message with a list of games in to a specific chat
+    """
+    games = funcs.sort_games(funcs.get_games())
+
+    game_lines = []
+    for game in games:
+        game_lines.append(
+            f'\\* _game {game.name}_ `{game.count}/{game.limit}` /show\\_{game.id}')
+
+    text = f'*Games*\n\n' + '\n'.join(game_lines)
+
+    bot.send_message(
+        chat_id=chat_id,
+        parse_mode=telegram.parsemode.ParseMode.MARKDOWN_V2,
+        text=text,
+    )
+
+
+@dramatiq.actor(max_retries=5)
+def send_game_to_telegram(chat_id, game_id):
+    """Sends a message with a list of games in to a specific chat
+    """
+    print("ok")
+
+    game = funcs.get_game(game_id)
+
+    text = f'*Game {game.name}*\n\n' \
+           f'_Players_: `{game.count}/{game.limit}`\n' \
+           f'_Size_: `{game.width}x{game.height}`\n' \
+           f'_Rate_: `{game.rate}pps`\n\n' \
+           f'[Play now\\!]({game.link})\n\n' \
+           f'Back /list'
+
+    image_path = funcs.get_image_path(game_id,
+                                      (game.width, game.height),
+                                      settings.SCREENSHOT_SLUG_MEDIUM)
+    if Path(image_path).is_file():
+        bot.send_photo(
+            chat_id=chat_id,
+            photo=open(image_path, 'rb'),
+        )
+
+    bot.send_message(
+        chat_id=chat_id,
+        parse_mode=telegram.parsemode.ParseMode.MARKDOWN_V2,
+        text=text,
+        disable_web_page_preview='True',
+    )

@@ -32,7 +32,34 @@ def get_games_ids() -> List[int]:
     return list([game.id for game in games.games])
 
 
+def get_games() -> List[Game]:
+    """Returns games identifiers.
+    """
+    client = get_api_client()
+    games = client.get_games()
+    return list([game for game in games.games])
+
+
 def get_game_objects(game_id: int) -> Tuple[Tuple[int, int], list]:
+    """Returns map size and game objects.
+
+    Parameters:
+      game_id: a game identifier.
+
+    Raises:
+      APIError: when Rest API has returned an error.
+      ParseError: when there has been incorrect response.
+    """
+    client = get_api_client()
+    objects = client.get_game_objects(game_id)
+    prepared_objects = []
+    for raw_object in objects.objects:
+        object_type, dots = ObjectParser.parse(raw_object)
+        prepared_objects.append(ObjectFactory.create(object_type, dots))
+    return (objects.map.width, objects.map.height), prepared_objects
+
+
+def get_game_objects_v2(game_id: int) -> Tuple[Tuple[int, int], list]:
     """Returns map size and game objects.
 
     Parameters:
@@ -202,4 +229,28 @@ def create_game(limit: int, width: int, height: int,
     """
     client = get_api_client()
     game = client.create_game(limit, width, height, enable_walls)
+    return game
+
+
+def sort_games(games: List[Game]) -> List[Game]:
+    """Function sorts games
+    """
+    # TODO: try to come up with a more efficient implementation
+    empty_games = filter(lambda game: game.is_empty(), games)
+    full_games = filter(lambda game: game.is_full(), games)
+    relevant_games = filter(lambda game: game.is_playable(), games)
+
+    result = []
+    result += sorted(relevant_games, key=lambda game: (game.rate, game.id))
+    result += sorted(empty_games, key=lambda game: (game.limit, game.id))
+    result += sorted(full_games, key=lambda game: (game.count, game.id))
+
+    return result
+
+
+def get_game(game_id: int) -> Game:
+    """Returns a game by a numeric id.
+    """
+    client = get_api_client()
+    game = client.get_game(game_id)
     return game
