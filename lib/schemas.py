@@ -18,6 +18,14 @@ ColorRGBWall: ColorRGB = (0x44, 0x77, 0x44)
 ColorRGBWatermelon: ColorRGB = (0xf0, 0xff, 0x0)
 
 
+OBJECT_LABEL_APPLE = 'apple'
+OBJECT_LABEL_CORPSE = 'corpse'
+OBJECT_LABEL_MOUSE = 'mouse'
+OBJECT_LABEL_SNAKE = 'snake'
+OBJECT_LABEL_WALL = 'wall'
+OBJECT_LABEL_WATERMELON = 'watermelon'
+
+
 class Game(BaseModel):
     """Game schema
     """
@@ -96,12 +104,12 @@ class ObjectType(str, Enum):
     """Game objects types enumeration
     """
 
-    apple = 'apple'
-    corpse = 'corpse'
-    mouse = 'mouse'
-    snake = 'snake'
-    wall = 'wall'
-    watermelon = 'watermelon'
+    apple = OBJECT_LABEL_APPLE
+    corpse = OBJECT_LABEL_CORPSE
+    mouse = OBJECT_LABEL_MOUSE
+    snake = OBJECT_LABEL_SNAKE
+    wall = OBJECT_LABEL_WALL
+    watermelon = OBJECT_LABEL_WATERMELON
 
 
 class Colored(ABC):
