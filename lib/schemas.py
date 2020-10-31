@@ -10,12 +10,12 @@ Dot = Tuple[int, int]
 
 ColorRGB = Tuple[int, int, int]
 
-ColorRGBApple: ColorRGB = (0x0, 0xff, 0x0)
-ColorRGBCorpse: ColorRGB = (0x0, 0x0, 0xff)
-ColorRGBMouse: ColorRGB = (0xff, 0x0, 0x0)
-ColorRGBSnake: ColorRGB = (0xff, 0x44, 0x44)
-ColorRGBWall: ColorRGB = (0x44, 0x77, 0x44)
-ColorRGBWatermelon: ColorRGB = (0xf0, 0xff, 0x0)
+COLOR_RGB_APPLE: ColorRGB = (0x0, 0xff, 0x0)
+COLOR_RGB_CORPSE: ColorRGB = (0x0, 0x0, 0xff)
+COLOR_RGB_MOUSE: ColorRGB = (0xff, 0x0, 0x0)
+COLOR_RGB_SNAKE: ColorRGB = (0xff, 0x44, 0x44)
+COLOR_RGB_WALL: ColorRGB = (0x44, 0x77, 0x44)
+COLOR_RGB_WATERMELON: ColorRGB = (0xf0, 0xff, 0x0)
 
 
 OBJECT_LABEL_APPLE = 'apple'
@@ -130,7 +130,7 @@ class Apple(BaseModel, Colored, OneDotObject):
     dot: Dot
 
     @staticmethod
-    def color() -> ColorRGB: return ColorRGBApple
+    def color() -> ColorRGB: return COLOR_RGB_APPLE
 
 
 class Corpse(BaseModel, Colored):
@@ -142,7 +142,7 @@ class Corpse(BaseModel, Colored):
     dots: List[Dot]
 
     @staticmethod
-    def color() -> ColorRGB: return ColorRGBCorpse
+    def color() -> ColorRGB: return COLOR_RGB_CORPSE
 
 
 class Mouse(BaseModel, Colored, OneDotObject):
@@ -155,7 +155,7 @@ class Mouse(BaseModel, Colored, OneDotObject):
     direction: str
 
     @staticmethod
-    def color() -> ColorRGB: return ColorRGBMouse
+    def color() -> ColorRGB: return COLOR_RGB_MOUSE
 
 
 class Snake(BaseModel, Colored):
@@ -167,7 +167,7 @@ class Snake(BaseModel, Colored):
     dots: List[Dot]
 
     @staticmethod
-    def color() -> ColorRGB: return ColorRGBSnake
+    def color() -> ColorRGB: return COLOR_RGB_SNAKE
 
 
 class Wall(BaseModel, Colored):
@@ -179,7 +179,7 @@ class Wall(BaseModel, Colored):
     dots: List[Dot]
 
     @staticmethod
-    def color() -> ColorRGB: return ColorRGBWall
+    def color() -> ColorRGB: return COLOR_RGB_WALL
 
 
 class Watermelon(BaseModel, Colored):
@@ -191,7 +191,7 @@ class Watermelon(BaseModel, Colored):
     dots: List[Dot]
 
     @staticmethod
-    def color() -> ColorRGB: return ColorRGBWatermelon
+    def color() -> ColorRGB: return COLOR_RGB_WATERMELON
 
 
 AnyObject = Union[Apple, Corpse, Mouse, Snake, Wall, Watermelon]
