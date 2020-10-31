@@ -121,7 +121,8 @@ class Apple(BaseModel, Colored, OneDotObject):
     type: ObjectType = Field(const=True, default=ObjectType.apple)
     dot: Dot
 
-    def color(self) -> ColorRGB: return ColorRGBApple
+    @staticmethod
+    def color() -> ColorRGB: return ColorRGBApple
 
 
 class Corpse(BaseModel, Colored):
