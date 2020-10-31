@@ -2,10 +2,21 @@
 the Snake-Server.
 """
 
-from typing import Any, Tuple
+from typing import Tuple
 
 from requests.utils import CaseInsensitiveDict
 from requests import Session
+
+from lib.schemas import (
+    Broadcast,
+    Capacity,
+    DeletedGame,
+    Game,
+    Games,
+    Info,
+    Objects,
+    Pong,
+)
 
 
 _PARAM_LABEL_LIMIT = 'limit'
@@ -42,6 +53,7 @@ class APIClient(Session):
     _FIELD_TEXT = 'text'
 
     _DEFAULT_ERROR_MSG = 'undefined error'
+    _RESPONSE_NOT_JSON_MSG = 'response supposed to be a valid json object'
 
     def __init__(self, api_address: str, user_agent: str = None):
         """
@@ -69,7 +81,7 @@ class APIClient(Session):
             'Accept': 'application/json',
         })
 
-    def get_games(self, limit: int = None, sorting: str = None) -> Any:
+    def get_games(self, limit: int = None, sorting: str = None) -> Games:
         """Returns information about ongoing games on a server.
 
         Returns:
@@ -81,34 +93,38 @@ class APIClient(Session):
         if sorting:
             assert sorting in _SORTING, 'Invalid sorting type has been passed'
             params[_PARAM_LABEL_SORTING] = sorting
-        return self._call('GET', 'games', params=params)
+        raw = self._call('GET', 'games', params=params)
+        return Games.parse_raw(raw)
 
-    def get_game(self, game_id: int) -> Any:
+    def get_game(self, game_id: int) -> Game:
         """Returns information about a game with specified game identifier.
 
         Parameters:
           game_id: a game identifier.
         """
-        return self._call('GET', 'games', str(game_id))
+        raw = self._call('GET', 'games', str(game_id))
+        return Game.parse_raw(raw)
 
-    def get_game_objects(self, game_id: int) -> Any:
+    def get_game_objects(self, game_id: int) -> Objects:
         """Returns information about game objects placed on a game map.
 
         Parameters:
           game_id: a game identifier.
         """
-        return self._call('GET', 'games', str(game_id), 'objects')
+        raw = self._call('GET', 'games', str(game_id), 'objects')
+        return Objects.parse_raw(raw)
 
-    def delete_game(self, game_id: int) -> Any:
+    def delete_game(self, game_id: int) -> DeletedGame:
         """Sends a request for deleting a game.
 
         Parameters:
           game_id: a game identifier.
         """
-        return self._call('DELETE', 'games', str(game_id))
+        raw = self._call('DELETE', 'games', str(game_id))
+        return DeletedGame.parse_raw(raw)
 
     def create_game(self, limit: int, width: int, height: int,
-                    enable_walls: bool = True) -> Any:
+                    enable_walls: bool = True) -> Game:
         """Sends a request to create a game with given parameters.
 
         Parameters:
@@ -117,39 +133,44 @@ class APIClient(Session):
           height: map height.
           enable_walls: flag whether to add walls or not.
         """
-        return self._call('POST', 'games', data={
+        raw = self._call('POST', 'games', data={
             'limit': limit,
             'width': width,
             'height': height,
             'enable_walls': enable_walls,
         })
+        return Game.parse_raw(raw)
 
-    def broadcast(self, game_id: int, message: str) -> Any:
-        return self._call('POST', 'games', str(game_id), 'broadcast', data={
+    def broadcast(self, game_id: int, message: str) -> Broadcast:
+        raw = self._call('POST', 'games', str(game_id), 'broadcast', data={
             'message': message,
         })
+        return Broadcast.parse_raw(raw)
 
-    def capacity(self) -> Any:
+    def capacity(self) -> Capacity:
         """Sends a request to retrieve information about server current
         capacity.
         """
-        return self._call('GET', 'capacity')
+        raw = self._call('GET', 'capacity')
+        return Capacity.parse_raw(raw)
 
-    def info(self) -> Any:
+    def info(self) -> Info:
         """Sends a request to retrieve information about server
         """
-        return self._call('GET', 'info')
+        raw = self._call('GET', 'info')
+        return Info.parse_raw(raw)
 
-    def ping(self) -> Any:
+    def ping(self) -> Pong:
         """Sends ping request
         """
-        return self._call('GET', 'ping')
+        raw = self._call('GET', 'ping')
+        return Pong.parse_raw(raw)
 
     def _mk_url(self, url_parts: Tuple[str, ...]):
         return '/'.join((self._api_address,) + url_parts)
 
     def _call(self, method: str, *url_parts, data=None,
-              params=None, stream=None) -> Any:
+              params=None, stream=None) -> bytes:
         """Sends a request with given method, url, data, params to the
         specified server address.
 
@@ -168,10 +189,15 @@ class APIClient(Session):
                                 params=params,
                                 data=data,
                                 stream=stream)
-        result = response.json()
+
         if response.status_code not in (200, 201):
-            self._raise_error(response.status_code, result)
-        return result
+            try:
+                self._raise_error(response.status_code, response.json())
+            except ValueError:
+                raise APIError(response.status_code,
+                               self._RESPONSE_NOT_JSON_MSG)
+
+        return response.content
 
     def _raise_error(self, status: int, result: dict):
         """Raises an error with given status and data.
@@ -190,7 +216,6 @@ class APIClient(Session):
         Parameters:
           result: a result dictionary.
         """
-        # TODO: Create an error parser.
         try:
             return result[self._FIELD_TEXT]
         except KeyError:

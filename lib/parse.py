@@ -125,6 +125,15 @@ class GamesParser:
             yield game[GamesParser.LABEL_GAME_ID]
 
 
+class GameParser:
+    """Parses a game entity
+    """
+
+    @staticmethod
+    def parse(raw_game: dict) -> dict:
+        return raw_game
+
+
 class ParseObjectsError(ParseError):
     pass
 

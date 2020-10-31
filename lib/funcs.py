@@ -12,14 +12,10 @@ from PIL import Image
 
 from lib.api import APIClient
 from lib import settings
-from lib.parse import (
-    MapSizeParser,
-    GamesParser,
-    ObjectsParser,
-    ObjectParser,
-)
+from lib.parse import ObjectParser
 from lib.objects import ObjectFactory
 from lib.screenshot import Screenshot
+from lib.schemas import Game
 
 
 def get_api_client() -> APIClient:
@@ -32,8 +28,8 @@ def get_games_ids() -> List[int]:
     """Returns games identifiers.
     """
     client = get_api_client()
-    raw_games = client.get_games()
-    return list(GamesParser.parse(raw_games))
+    games = client.get_games()
+    return list([game.id for game in games.games])
 
 
 def get_game_objects(game_id: int) -> Tuple[Tuple[int, int], list]:
@@ -47,15 +43,12 @@ def get_game_objects(game_id: int) -> Tuple[Tuple[int, int], list]:
       ParseError: when there has been incorrect response.
     """
     client = get_api_client()
-    raw_data = client.get_game_objects(game_id)
-
-    raw_map_size, raw_objects = ObjectsParser.parse(raw_data)
-    map_size = MapSizeParser.parse(raw_map_size)
-    objects = []
-    for raw_object in raw_objects:
+    objects = client.get_game_objects(game_id)
+    prepared_objects = []
+    for raw_object in objects.objects:
         object_type, dots = ObjectParser.parse(raw_object)
-        objects.append(ObjectFactory.create(object_type, dots))
-    return map_size, objects
+        prepared_objects.append(ObjectFactory.create(object_type, dots))
+    return (objects.map.width, objects.map.height), prepared_objects
 
 
 def generate_screenshot_image(map_size: Tuple[int, int],
@@ -191,3 +184,22 @@ def delete_screenshots(exclude_screenshots: Tuple[str]):
         if filename.endswith('.jpeg') and filename not in exclude_screenshots:
             file_path = os.path.join(settings.SCREENSHOT_DEST_PATH, filename)
             os.remove(file_path)
+
+
+def create_game(limit: int, width: int, height: int,
+                enable_walls: bool = True) -> Game:
+    """Function creates a new game.
+
+    Parameters:
+      limit: players limit.
+      width: map width.
+      height: map height.
+      enable_walls: flag whether to add walls or not.
+
+    Raises:
+      APIError: when Rest API has returned an error.
+      ParseError: when there has been incorrect response.
+    """
+    client = get_api_client()
+    game = client.create_game(limit, width, height, enable_walls)
+    return game
