@@ -11,11 +11,12 @@ from PIL import Image
 from lib.schemas import ColorRGB, AnyObjectList
 
 
+BLACK_COLOR: ColorRGB = (0x0, 0x0, 0x0)
+
+
 class Canvas:
     """A bare canvas
     """
-
-    BLACK_COLOR: ColorRGB = (0x0, 0x0, 0x0)
 
     @staticmethod
     def _init_img(width: int, height: int) -> np.ndarray:
@@ -227,7 +228,7 @@ class Screenshot:
     """A game screenshot.
     """
 
-    COLOR_BACKGROUND: ColorRGB = (0x0, 0x0, 0x0)
+    COLOR_BACKGROUND: ColorRGB = BLACK_COLOR
     BORDER_SIZE = 2
     COLOR_BORDER: ColorRGB = (0x0, 0x11, 0x0)
     COLOR_GRID: ColorRGB = (0x0, 0x22, 0x0)
