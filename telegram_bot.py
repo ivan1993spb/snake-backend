@@ -4,7 +4,8 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters,\
 import logging
 
 from lib import settings
-from lib.actors import send_games_list_to_telegram, send_game_to_telegram
+from lib.actors import send_games_list_to_telegram, send_game_to_telegram, \
+    delete_game_from_telegram
 
 WELCOME_MESSAGE = 'Welcome!\nSend an image with some faces to begin'
 
@@ -48,6 +49,16 @@ def catify(update, context):
     logger.info(f'Photo received from {user.first_name} {user.last_name}')
 
 
+def delete(update, context):
+    print('delete', update.message.text)
+    _, game_id_str = update.message.text.split('_')
+    game_id = int(game_id_str)
+
+    print(update, game_id)
+
+    delete_game_from_telegram.send(update.message.chat.id, game_id)
+
+
 def main():
     # Initialize the bot
     updater = Updater(token=settings.TELEGRAM_TOKEN, use_context=True)
@@ -55,12 +66,15 @@ def main():
     # Get the update dispatcher
     dp = updater.dispatcher
 
+    # TODO: Add commands: help, info, create_game, delete_game, random game
+
     # Define command handlers
     dp.add_handler(CommandHandler('start', start))
     dp.add_handler(CommandHandler('help', help))
     dp.add_handler(CommandHandler('test', catify))
     dp.add_handler(CommandHandler('list', list_games))
     dp.add_handler(MessageHandler(Filters.regex(r'^/show_[\d]+$'), show))
+    dp.add_handler(MessageHandler(Filters.regex(r'^/delete_[\d]+$'), delete))
 
     # Log all errors
     dp.add_error_handler(error)
