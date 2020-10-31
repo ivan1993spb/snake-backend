@@ -86,6 +86,10 @@ class APIClient(Session):
 
         Returns:
           information about games.
+
+        Raises:
+          APIError: when something wrong with a response.
+          ValidationError: when it isn't possible to parse response.
         """
         params = {}
         if limit:
@@ -101,6 +105,10 @@ class APIClient(Session):
 
         Parameters:
           game_id: a game identifier.
+
+        Raises:
+          APIError: when something wrong with a response.
+          ValidationError: when it isn't possible to parse response.
         """
         raw = self._call('GET', 'games', str(game_id))
         return Game.parse_raw(raw)
@@ -110,6 +118,10 @@ class APIClient(Session):
 
         Parameters:
           game_id: a game identifier.
+
+        Raises:
+          APIError: when something wrong with a response.
+          ValidationError: when it isn't possible to parse response.
         """
         raw = self._call('GET', 'games', str(game_id), 'objects')
         return Objects.parse_raw(raw)
@@ -119,6 +131,10 @@ class APIClient(Session):
 
         Parameters:
           game_id: a game identifier.
+
+        Raises:
+          APIError: when something wrong with a response.
+          ValidationError: when it isn't possible to parse response.
         """
         raw = self._call('DELETE', 'games', str(game_id))
         return DeletedGame.parse_raw(raw)
@@ -132,6 +148,10 @@ class APIClient(Session):
           width: map width.
           height: map height.
           enable_walls: flag whether to add walls or not.
+
+        Raises:
+          APIError: when something wrong with a response.
+          ValidationError: when it isn't possible to parse response.
         """
         raw = self._call('POST', 'games', data={
             'limit': limit,
@@ -150,18 +170,30 @@ class APIClient(Session):
     def capacity(self) -> Capacity:
         """Sends a request to retrieve information about server current
         capacity.
+
+        Raises:
+          APIError: when something wrong with a response.
+          ValidationError: when it isn't possible to parse response.
         """
         raw = self._call('GET', 'capacity')
         return Capacity.parse_raw(raw)
 
     def info(self) -> Info:
         """Sends a request to retrieve information about server
+
+        Raises:
+          APIError: when something wrong with a response.
+          ValidationError: when it isn't possible to parse response.
         """
         raw = self._call('GET', 'info')
         return Info.parse_raw(raw)
 
     def ping(self) -> Pong:
         """Sends ping request
+
+        Raises:
+          APIError: when something wrong with a response.
+          ValidationError: when it isn't possible to parse response.
         """
         raw = self._call('GET', 'ping')
         return Pong.parse_raw(raw)
