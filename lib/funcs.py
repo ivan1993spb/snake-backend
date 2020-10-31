@@ -7,6 +7,7 @@ import os.path
 import json
 import itertools
 from typing import List, Tuple, Dict
+from urllib.parse import urlparse, urlunparse
 
 from PIL import Image
 
@@ -15,7 +16,7 @@ from lib import settings
 from lib.parse import ObjectParser
 from lib.objects import ObjectFactory
 from lib.screenshot import Screenshot
-from lib.schemas import Game
+from lib.schemas import Game, Map, AnyObjectList
 
 
 def get_api_client() -> APIClient:
@@ -40,7 +41,22 @@ def get_games() -> List[Game]:
     return list([game for game in games.games])
 
 
-def get_game_objects(game_id: int) -> Tuple[Tuple[int, int], list]:
+def prepare_game_objects(objects: AnyObjectList) -> list:
+    """Returns map size and game objects.
+
+    Parameters:
+      objects: a list of game objects.
+    """
+    prepared_objects = []
+
+    for raw_object in objects:
+        object_type, dots = ObjectParser.parse(raw_object)
+        prepared_objects.append(ObjectFactory.create(object_type, dots))
+
+    return prepared_objects
+
+
+def get_game_objects(game_id: int) -> Tuple[Map, AnyObjectList]:
     """Returns map size and game objects.
 
     Parameters:
@@ -48,34 +64,10 @@ def get_game_objects(game_id: int) -> Tuple[Tuple[int, int], list]:
 
     Raises:
       APIError: when Rest API has returned an error.
-      ParseError: when there has been incorrect response.
     """
     client = get_api_client()
     objects = client.get_game_objects(game_id)
-    prepared_objects = []
-    for raw_object in objects.objects:
-        object_type, dots = ObjectParser.parse(raw_object)
-        prepared_objects.append(ObjectFactory.create(object_type, dots))
-    return (objects.map.width, objects.map.height), prepared_objects
-
-
-def get_game_objects_v2(game_id: int) -> Tuple[Tuple[int, int], list]:
-    """Returns map size and game objects.
-
-    Parameters:
-      game_id: a game identifier.
-
-    Raises:
-      APIError: when Rest API has returned an error.
-      ParseError: when there has been incorrect response.
-    """
-    client = get_api_client()
-    objects = client.get_game_objects(game_id)
-    prepared_objects = []
-    for raw_object in objects.objects:
-        object_type, dots = ObjectParser.parse(raw_object)
-        prepared_objects.append(ObjectFactory.create(object_type, dots))
-    return (objects.map.width, objects.map.height), prepared_objects
+    return objects.map, objects.objects
 
 
 def generate_screenshot_image(map_size: Tuple[int, int],
@@ -150,7 +142,9 @@ def take_sized_screenshots_by_game_id(game_id: int) -> List[str]:
     Returns:
       A list of file names.
     """
-    map_size, objects = get_game_objects(game_id)
+    map_, objects = get_game_objects(game_id)
+    map_size = (map_.width, map_.height)
+    objects = prepare_game_objects(objects)
     files = []
     for size_slug, length in settings.SCREENSHOT_LENGTHS.items():
         path = get_image_path(game_id, map_size, size_slug)
@@ -254,3 +248,12 @@ def get_game(game_id: int) -> Game:
     client = get_api_client()
     game = client.get_game(game_id)
     return game
+
+
+def get_game_link(game: Game) -> str:
+    """Compounds a link for a given game
+    """
+    (scheme, netloc, path, params, query, _) = \
+        urlparse(settings.SNAKE_CLIENT_URL)
+    fragment = f'/games/{game.id}/play'
+    return urlunparse((scheme, netloc, path, params, query, fragment))

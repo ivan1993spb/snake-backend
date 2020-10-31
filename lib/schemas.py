@@ -6,6 +6,10 @@ from pydantic import BaseModel
 from num2words import num2words
 
 
+# TODO: Use color from pydantic?
+# from pydantic.color import Color
+
+
 Dot = Tuple[int, int]
 
 
@@ -20,10 +24,6 @@ class Game(BaseModel):
     @property
     def name(self) -> str:
         return num2words(self.id)
-
-    @property
-    def link(self) -> str:
-        return f'https://snakeonline.xyz/client/#/games/{self.id}/play'
 
     def is_full(self) -> bool:
         return self.count == self.limit
@@ -83,6 +83,9 @@ class Apple(BaseModel):
     type = ObjectType.apple
     dot: Dot
 
+    @property
+    def dots(self) -> List[Dot]: return [self.dot]
+
 
 class Corpse(BaseModel):
     id: int
@@ -95,6 +98,9 @@ class Mouse(BaseModel):
     type = ObjectType.mouse
     dot: Dot
     direction: str
+
+    @property
+    def dots(self) -> List[Dot]: return [self.dot]
 
 
 class Snake(BaseModel):
@@ -115,19 +121,13 @@ class Watermelon(BaseModel):
     dots: List[Dot]
 
 
-# class Objects(BaseModel):
-#     objects: List[
-#         Union[
-#             Apple,
-#             Corpse,
-#             Mouse,
-#             Snake,
-#             Wall,
-#             Watermelon,
-#         ]
-#     ]
-#     map: Map
+AnyObject = Union[Apple, Corpse, Mouse, Snake, Wall, Watermelon]
+
+# TODO: Define the proper type
+# AnyObjectList = List[AnyObject]
+AnyObjectList = List[dict]
+
 
 class Objects(BaseModel):
-    objects: List[dict]
+    objects: AnyObjectList
     map: Map

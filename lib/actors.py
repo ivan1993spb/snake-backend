@@ -159,6 +159,8 @@ def send_games_list_to_telegram(chat_id, *args):
         game_lines.append(
             f'\\* _game {game.name}_ `{game.count}/{game.limit}` /show\\_{game.id}')
 
+    # TODO: Move the code to the funcs module.
+    # TODO: Add emoji.
     text = f'*Games*\n\n' + '\n'.join(game_lines)
 
     bot.send_message(
@@ -172,15 +174,15 @@ def send_games_list_to_telegram(chat_id, *args):
 def send_game_to_telegram(chat_id, game_id):
     """Sends a message with a list of games in to a specific chat
     """
-    print("ok")
-
     game = funcs.get_game(game_id)
 
+    # TODO: Move the code to the funcs module.
+    # TODO: Add emoji.
     text = f'*Game {game.name}*\n\n' \
            f'_Players_: `{game.count}/{game.limit}`\n' \
            f'_Size_: `{game.width}x{game.height}`\n' \
            f'_Rate_: `{game.rate}pps`\n\n' \
-           f'[Play now\\!]({game.link})\n\n' \
+           f'[Play now\\!]({funcs.get_game_link(game)})\n\n' \
            f'Back /list'
 
     image_path = funcs.get_image_path(game_id,
@@ -190,11 +192,13 @@ def send_game_to_telegram(chat_id, game_id):
         bot.send_photo(
             chat_id=chat_id,
             photo=open(image_path, 'rb'),
+            caption=text,
+            parse_mode=telegram.parsemode.ParseMode.MARKDOWN_V2,
         )
-
-    bot.send_message(
-        chat_id=chat_id,
-        parse_mode=telegram.parsemode.ParseMode.MARKDOWN_V2,
-        text=text,
-        disable_web_page_preview='True',
-    )
+    else:
+        bot.send_message(
+            chat_id=chat_id,
+            parse_mode=telegram.parsemode.ParseMode.MARKDOWN_V2,
+            text=text,
+            disable_web_page_preview='True',
+        )

@@ -167,6 +167,7 @@ class APIClient(Session):
         return Pong.parse_raw(raw)
 
     def _mk_url(self, url_parts: Tuple[str, ...]):
+        # TODO: use urllib to construct the url.
         return '/'.join((self._api_address,) + url_parts)
 
     def _call(self, method: str, *url_parts, data=None,

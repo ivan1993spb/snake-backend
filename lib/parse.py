@@ -1,3 +1,5 @@
+# TODO: Delete this module
+
 """The module contains classes to parse server responses.
 """
 

@@ -21,6 +21,7 @@ RATE_LIMITS_REDIS_URL = env(
 )
 
 SNAKE_API_ADDRESS = env('SNAKE_API_ADDRESS', 'http://localhost:8080/api')
+SNAKE_CLIENT_URL = env('SNAKE_CLIENT_URL', 'http://localhost:8080/client/')
 CLIENT_NAME = env('CLIENT_NAME', 'SnakeCLIClient')
 
 TASK_INTERVAL_SCREENSHOT = env.int('TASK_INTERVAL_SCREENSHOT', 60)

@@ -5,6 +5,7 @@ initializing objects.
 from typing import Tuple, Generator, List
 
 from lib.color import COLOR_RGB
+from lib.schemas import Dot
 
 
 OBJECT_TYPE_APPLE = 1
@@ -16,8 +17,8 @@ OBJECT_TYPE_MOUSE = 6
 OBJECT_TYPE_UNKNOWN = 7
 
 
-DOT = Tuple[int, int]
-DOTS = List[DOT]
+# TODO: Move to schemas
+Dots = List[Dot]
 
 
 class Object:
@@ -25,7 +26,7 @@ class Object:
     """
     COLOR: COLOR_RGB = (0x0, 0x0, 0x0)
 
-    def __init__(self, dots: DOTS):
+    def __init__(self, dots: Dots):
         """Initializes an object with passed dots.
 
         Parameters:
@@ -33,7 +34,7 @@ class Object:
         """
         self._dots = dots
 
-    def dots(self) -> Generator[Tuple[DOT, COLOR_RGB], None, None]:
+    def dots(self) -> Generator[Tuple[Dot, COLOR_RGB], None, None]:
         """Returns a generator with dots
 
         Returns:
@@ -87,7 +88,7 @@ class ObjectFactory:
     }
 
     @staticmethod
-    def create(object_type: int, dots: DOTS):
+    def create(object_type: int, dots: Dots):
         """Casts given object type with a class of the object and tries to
         create an object instance. If succeed, returns the object instance.
 
