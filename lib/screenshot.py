@@ -8,14 +8,14 @@ from typing import Tuple
 import numpy as np
 from PIL import Image
 
-from lib.color import COLOR_RGB
+from lib.schemas import ColorRGB
 
 
 class Canvas:
     """A bare canvas
     """
 
-    BLACK_COLOR: COLOR_RGB = (0x0, 0x0, 0x0)
+    BLACK_COLOR: ColorRGB = (0x0, 0x0, 0x0)
 
     @staticmethod
     def _init_img(width: int, height: int) -> np.ndarray:
@@ -45,8 +45,8 @@ class GridCanvas(Canvas):
                  max_img_px_width: int,
                  max_img_px_height: int,
                  border_size: int,
-                 border_color: COLOR_RGB,
-                 grid_color: COLOR_RGB):
+                 border_color: ColorRGB,
+                 grid_color: ColorRGB):
         """Initializes a GridCanvas instance.
 
         Parameters:
@@ -129,7 +129,7 @@ class GridCanvas(Canvas):
         px_y_2 = px_y_1 + self._dot
         return (px_x_1, px_y_1), (px_x_2, px_y_2)
 
-    def _draw_grid(self, grid_color: COLOR_RGB):
+    def _draw_grid(self, grid_color: ColorRGB):
         """Draws a grid of given color.
 
         Parameters:
@@ -155,7 +155,7 @@ class GridCanvas(Canvas):
                                    line_px_y + self._line,
                                    grid_color)
 
-    def _draw_borders(self, border_color: COLOR_RGB):
+    def _draw_borders(self, border_color: ColorRGB):
         """Draws borders of given color.
 
         Parameters:
@@ -190,7 +190,7 @@ class GridCanvas(Canvas):
                                self._img_px_height,
                                border_color)
 
-    def draw_dot(self, dot_x: int, dot_y: int, color: COLOR_RGB):
+    def draw_dot(self, dot_x: int, dot_y: int, color: ColorRGB):
         """Draws a single dot.
         """
         (px_x_1, px_y_1), (px_x_2, px_y_2) = self._calculate_rect_px_x_y(
@@ -202,7 +202,7 @@ class GridCanvas(Canvas):
     def _draw_px_rect(self,
                       x1: int, y1: int,
                       x2: int, y2: int,
-                      color: COLOR_RGB):
+                      color: ColorRGB):
         self.img[y1:y2, x1:x2] = color
 
     def size(self) -> Tuple[int, int]:
@@ -227,10 +227,10 @@ class Screenshot:
     """A game screenshot.
     """
 
-    COLOR_BACKGROUND: COLOR_RGB = (0x0, 0x0, 0x0)
+    COLOR_BACKGROUND: ColorRGB = (0x0, 0x0, 0x0)
     BORDER_SIZE = 2
-    COLOR_BORDER: COLOR_RGB = (0x0, 0x11, 0x0)
-    COLOR_GRID: COLOR_RGB = (0x0, 0x22, 0x0)
+    COLOR_BORDER: ColorRGB = (0x0, 0x11, 0x0)
+    COLOR_GRID: ColorRGB = (0x0, 0x22, 0x0)
 
     def __init__(self,
                  map_size: Tuple[int, int],
