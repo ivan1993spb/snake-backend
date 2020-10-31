@@ -8,7 +8,7 @@ from typing import Tuple
 import numpy as np
 from PIL import Image
 
-from lib.schemas import ColorRGB
+from lib.schemas import ColorRGB, AnyObjectList
 
 
 class Canvas:
@@ -235,7 +235,7 @@ class Screenshot:
     def __init__(self,
                  map_size: Tuple[int, int],
                  max_size: Tuple[int, int],
-                 game_objects: list,
+                 game_objects: AnyObjectList,
                  strict_sized: bool = False):
         """Initializes a screenshot.
 
@@ -261,9 +261,10 @@ class Screenshot:
 
         self._image = self._rgb_image(strict_sized)
 
-    def _draw_objects(self, game_objects: list):
+    def _draw_objects(self, game_objects: AnyObjectList):
         for game_object in game_objects:
-            for (x, y), color in game_object.dots():
+            color = game_object.color()
+            for (x, y) in game_object.dots:
                 self._canvas.draw_dot(x, y, color)
 
     def _rgb_image(self, strict_sized: bool) -> Image:
