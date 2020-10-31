@@ -23,10 +23,10 @@ from dramatiq.rate_limits.backends import (
 from dramatiq.results import Results, ResultBackend
 from dramatiq.middleware import Prometheus
 import telegram
+from pydantic import ValidationError
 
 from lib import settings
 from lib import funcs
-from lib.parse import ParseError
 from lib.api import APIError
 
 
@@ -93,7 +93,7 @@ def dispatch_taking_screenshots() -> Dict[int, List[str]]:
                 logger.debug("Game %s => %s", game_id, files)
                 games_screenshots[game_id] = files
         return games_screenshots
-    except ParseError as e:
+    except ValidationError as e:
         logger.error('Parse error: %s', e)
     except APIError as e:
         logger.error('API response error: %s', e)
@@ -115,7 +115,7 @@ def take_sized_screenshots_by_game_id(game_id: int) -> Tuple[int, list]:
     try:
         files = funcs.take_sized_screenshots_by_game_id(game_id)
         return game_id, files
-    except ParseError as e:
+    except ValidationError as e:
         logger.error('Parse error: %s', e)
     except APIError as e:
         logger.error('API response error: %s', e)
@@ -157,7 +157,7 @@ def send_games_list_to_telegram(chat_id, *args):
     game_lines = []
     for game in games:
         game_lines.append(
-            f'\\* _game {game.name}_ `{game.count}/{game.limit}` /show\\_{game.id}')
+            f'\\* _game {funcs.get_game_name(game)}_ `{game.count}/{game.limit}` /show\\_{game.id}')
 
     # TODO: Move the code to the funcs module.
     # TODO: Add emoji.
@@ -177,11 +177,13 @@ def send_game_to_telegram(chat_id, game_id):
     game = funcs.get_game(game_id)
 
     # TODO: Move the code to the funcs module.
+    # TODO: Delete only if 0 gamers
     # TODO: Add emoji.
-    text = f'*Game {game.name}*\n\n' \
+    text = f'*Game {funcs.get_game_name(game)}*\n\n' \
            f'_Players_: `{game.count}/{game.limit}`\n' \
            f'_Size_: `{game.width}x{game.height}`\n' \
            f'_Rate_: `{game.rate}pps`\n\n' \
+           f'/delete\\_{game.id}\n\n' \
            f'[Play now\\!]({funcs.get_game_link(game)})\n\n' \
            f'Back /list'
 
@@ -202,3 +204,18 @@ def send_game_to_telegram(chat_id, game_id):
             text=text,
             disable_web_page_preview='True',
         )
+
+
+@dramatiq.actor(max_retries=5)
+def delete_game_from_telegram(chat_id, game_id):
+    deleted_game = funcs.delete_game(game_id)
+
+    text = f'Game was deleted {deleted_game.id}\n\n' \
+           '/list'
+
+    bot.send_message(
+        chat_id=chat_id,
+        parse_mode=telegram.parsemode.ParseMode.MARKDOWN_V2,
+        text=text,
+        disable_web_page_preview='True',
+    )
