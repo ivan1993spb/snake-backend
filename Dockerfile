@@ -18,3 +18,4 @@ WORKDIR /usr/local/app
 
 COPY lib lib
 COPY scheduler.py ./
+COPY telegram_bot.py ./
