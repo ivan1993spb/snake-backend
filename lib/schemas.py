@@ -10,6 +10,7 @@ Dot = Tuple[int, int]
 
 ColorRGB = Tuple[int, int, int]
 
+
 COLOR_RGB_APPLE: ColorRGB = (0x0, 0xff, 0x0)
 COLOR_RGB_CORPSE: ColorRGB = (0x0, 0x0, 0xff)
 COLOR_RGB_MOUSE: ColorRGB = (0xff, 0x0, 0x0)
