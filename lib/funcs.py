@@ -26,6 +26,10 @@ def get_api_client() -> APIClient:
 
 def get_games_ids() -> List[int]:
     """Returns games identifiers.
+
+    Raises:
+      APIError: when Rest API has returned an error.
+      ValidationError: when server's response was invalid
     """
     client = get_api_client()
     games = client.get_games()
@@ -34,6 +38,10 @@ def get_games_ids() -> List[int]:
 
 def get_games() -> List[Game]:
     """Returns games identifiers.
+
+    Raises:
+      APIError: when Rest API has returned an error.
+      ValidationError: when server's response was invalid
     """
     client = get_api_client()
     games = client.get_games()
@@ -48,6 +56,7 @@ def get_game_objects(game_id: int) -> Tuple[Map, AnyObjectList]:
 
     Raises:
       APIError: when Rest API has returned an error.
+      ValidationError: when server's response was invalid
     """
     client = get_api_client()
     objects = client.get_game_objects(game_id)
@@ -202,7 +211,7 @@ def create_game(limit: int, width: int, height: int,
 
     Raises:
       APIError: when Rest API has returned an error.
-      ParseError: when there has been incorrect response.
+      ValidationError: when there has been incorrect response.
     """
     client = get_api_client()
     game = client.create_game(limit, width, height, enable_walls)
@@ -211,6 +220,10 @@ def create_game(limit: int, width: int, height: int,
 
 def sort_games(games: List[Game]) -> List[Game]:
     """Function sorts games
+
+    Raises:
+      APIError: when Rest API has returned an error.
+      ValidationError: when server's response was invalid
     """
     # TODO: try to come up with a more efficient implementation
     empty_games = filter(lambda game: game.is_empty(), games)
@@ -227,6 +240,10 @@ def sort_games(games: List[Game]) -> List[Game]:
 
 def get_game(game_id: int) -> Game:
     """Returns a game by a numeric id.
+
+    Raises:
+      APIError: when Rest API has returned an error.
+      ValidationError: when server's response was invalid
     """
     client = get_api_client()
     game = client.get_game(game_id)
@@ -235,6 +252,10 @@ def get_game(game_id: int) -> Game:
 
 def delete_game(game_id: int) -> DeletedGame:
     """Returns a game by a numeric id.
+
+    Raises:
+      APIError: when Rest API has returned an error.
+      ValidationError: when server's response was invalid
     """
     client = get_api_client()
     deleted_game = client.delete_game(game_id)
@@ -242,7 +263,7 @@ def delete_game(game_id: int) -> DeletedGame:
 
 
 def get_game_link(game: Game) -> str:
-    """Compounds a link for a given game
+    """Compounds a link for a given game.
     """
     (scheme, netloc, path, params, query, _) = \
         urlparse(settings.SNAKE_CLIENT_URL)
