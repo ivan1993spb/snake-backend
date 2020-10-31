@@ -17,4 +17,4 @@ RUN apk add --virtual deps --no-cache \
 WORKDIR /usr/local/app
 
 COPY lib lib
-COPY app.py ./
+COPY scheduler.py ./
