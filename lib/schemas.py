@@ -19,6 +19,9 @@ ColorRGBWatermelon: ColorRGB = (0xf0, 0xff, 0x0)
 
 
 class Game(BaseModel):
+    """Game schema
+    """
+
     id: int
     limit: int
     count: int
@@ -39,6 +42,7 @@ class Game(BaseModel):
 class OneDotObject(ABC):
     """Any game object which consists of one dot
     """
+
     dot: Dot
 
     @property
@@ -74,15 +78,24 @@ class Info(BaseModel):
 
 
 class Capacity(BaseModel):
+    """Schema of the server's capacity
+    """
+
     capacity: float
 
 
 class Map(BaseModel):
+    """Schema of map proportions
+    """
+
     width: int
     height: int
 
 
 class ObjectType(str, Enum):
+    """Game objects types enumeration
+    """
+
     apple = 'apple'
     corpse = 'corpse'
     mouse = 'mouse'
@@ -92,12 +105,18 @@ class ObjectType(str, Enum):
 
 
 class Colored(ABC):
+    """Abstract class for all colored objects
+    """
+
     @staticmethod
     @abstractmethod
     def color() -> ColorRGB: return 0, 0, 0
 
 
 class Apple(BaseModel, Colored, OneDotObject):
+    """Game object: an apple
+    """
+
     id: int
     type: ObjectType = Field(const=True, default=ObjectType.apple)
     dot: Dot
@@ -106,6 +125,9 @@ class Apple(BaseModel, Colored, OneDotObject):
 
 
 class Corpse(BaseModel, Colored):
+    """Game object: a corpse
+    """
+
     id: int
     type: ObjectType = Field(const=True, default=ObjectType.corpse)
     dots: List[Dot]
@@ -115,6 +137,9 @@ class Corpse(BaseModel, Colored):
 
 
 class Mouse(BaseModel, Colored, OneDotObject):
+    """Game object: a mouse
+    """
+
     id: int
     type: ObjectType = Field(const=True, default=ObjectType.mouse)
     dot: Dot
@@ -125,6 +150,9 @@ class Mouse(BaseModel, Colored, OneDotObject):
 
 
 class Snake(BaseModel, Colored):
+    """Game object: a snake
+    """
+
     id: int
     type: ObjectType = Field(const=True, default=ObjectType.snake)
     dots: List[Dot]
@@ -134,6 +162,9 @@ class Snake(BaseModel, Colored):
 
 
 class Wall(BaseModel, Colored):
+    """Game object: a wall
+    """
+
     id: int
     type: ObjectType = Field(const=True, default=ObjectType.wall)
     dots: List[Dot]
@@ -143,6 +174,9 @@ class Wall(BaseModel, Colored):
 
 
 class Watermelon(BaseModel, Colored):
+    """Game object: a watermelon
+    """
+
     id: int
     type: ObjectType = Field(const=True, default=ObjectType.watermelon)
     dots: List[Dot]
@@ -157,5 +191,8 @@ AnyObjectList = List[AnyObject]
 
 
 class Objects(BaseModel):
+    """A schema of response of the server for game's object list
+    """
+
     objects: AnyObjectList
     map: Map
