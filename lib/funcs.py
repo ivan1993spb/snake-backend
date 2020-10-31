@@ -6,17 +6,16 @@ import os
 import os.path
 import json
 import itertools
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, Union
 from urllib.parse import urlparse, urlunparse
 
 from PIL import Image
+from num2words import num2words
 
 from lib.api import APIClient
 from lib import settings
-from lib.parse import ObjectParser
-from lib.objects import ObjectFactory
 from lib.screenshot import Screenshot
-from lib.schemas import Game, Map, AnyObjectList
+from lib.schemas import Game, Map, AnyObjectList, DeletedGame
 
 
 def get_api_client() -> APIClient:
@@ -41,21 +40,6 @@ def get_games() -> List[Game]:
     return list([game for game in games.games])
 
 
-def prepare_game_objects(objects: AnyObjectList) -> list:
-    """Returns map size and game objects.
-
-    Parameters:
-      objects: a list of game objects.
-    """
-    prepared_objects = []
-
-    for raw_object in objects:
-        object_type, dots = ObjectParser.parse(raw_object)
-        prepared_objects.append(ObjectFactory.create(object_type, dots))
-
-    return prepared_objects
-
-
 def get_game_objects(game_id: int) -> Tuple[Map, AnyObjectList]:
     """Returns map size and game objects.
 
@@ -72,7 +56,7 @@ def get_game_objects(game_id: int) -> Tuple[Map, AnyObjectList]:
 
 def generate_screenshot_image(map_size: Tuple[int, int],
                               max_size: Tuple[int, int],
-                              objects: list,
+                              objects: AnyObjectList,
                               strict_sized: bool) -> Image:
     """Generates screenshot image.
 
@@ -114,7 +98,7 @@ def get_image_path(game_id: int,
 def save_objects_as_screenshot(path: str,
                                map_size: Tuple[int, int],
                                max_size: Tuple[int, int],
-                               objects: list,
+                               objects: AnyObjectList,
                                quality: int,
                                strict_sized: bool):
     """Saves given objects as a screenshot file.
@@ -144,7 +128,6 @@ def take_sized_screenshots_by_game_id(game_id: int) -> List[str]:
     """
     map_, objects = get_game_objects(game_id)
     map_size = (map_.width, map_.height)
-    objects = prepare_game_objects(objects)
     files = []
     for size_slug, length in settings.SCREENSHOT_LENGTHS.items():
         path = get_image_path(game_id, map_size, size_slug)
@@ -250,6 +233,14 @@ def get_game(game_id: int) -> Game:
     return game
 
 
+def delete_game(game_id: int) -> DeletedGame:
+    """Returns a game by a numeric id.
+    """
+    client = get_api_client()
+    deleted_game = client.delete_game(game_id)
+    return deleted_game
+
+
 def get_game_link(game: Game) -> str:
     """Compounds a link for a given game
     """
@@ -257,3 +248,9 @@ def get_game_link(game: Game) -> str:
         urlparse(settings.SNAKE_CLIENT_URL)
     fragment = f'/games/{game.id}/play'
     return urlunparse((scheme, netloc, path, params, query, fragment))
+
+
+def get_game_name(game: Union[Game, DeletedGame]) -> str:
+    """Returns string name of a given game
+    """
+    return num2words(game.id)
