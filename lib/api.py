@@ -226,9 +226,9 @@ class APIClient(Session):
         if response.status_code not in (200, 201):
             try:
                 self._raise_error(response.status_code, response.json())
-            except ValueError:
+            except ValueError as e:
                 raise APIError(response.status_code,
-                               self._RESPONSE_NOT_JSON_MSG)
+                               self._RESPONSE_NOT_JSON_MSG) from e
 
         return response.content
 
