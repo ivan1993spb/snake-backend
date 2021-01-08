@@ -5,7 +5,6 @@ screenshot generation and so on.
 
 import logging
 from typing import Tuple, Dict, List
-from pathlib import Path
 
 import dramatiq
 from dramatiq.brokers.redis import RedisBroker
@@ -24,10 +23,13 @@ from dramatiq.results import Results, ResultBackend
 from dramatiq.middleware import Prometheus
 import telegram
 from pydantic import ValidationError
+import redis
 
 from lib import settings
 from lib import funcs
 from lib.api import APIError
+from lib.telegram import TelegramBot
+from lib.telegram.command import Command
 
 
 logger = logging.getLogger(__name__)
@@ -69,6 +71,8 @@ DISTRIBUTED_MUTEX_REPORT = ConcurrentRateLimiter(rate_limits_backend,
                                                  limit=1)
 
 bot = telegram.Bot(token=settings.TELEGRAM_TOKEN)
+redis_client = redis.Redis.from_url(url=settings.TELEGRAM_REDIS_URL)
+tg_bot = TelegramBot(bot, redis_client)
 
 
 @dramatiq.actor(max_retries=0, store_results=True)
@@ -149,73 +153,16 @@ def delete_expired_screenshots_cache():
 
 
 @dramatiq.actor(max_retries=5)
-def send_games_list_to_telegram(chat_id, *args):
-    """Sends a message with a list of games in to a specific chat
+def handle_telegram_update(chat_id: int, cmd: Command, *args):
+    """Handles an update from telegram chat with a given identifier
+    command and arguments
+
+    Parameters:
+      chat_id: a telegram chat identifier
+      cmd: passed command
+      args: command arguments
     """
-    games = funcs.sort_games(funcs.get_games())
-
-    game_lines = []
-    for game in games:
-        game_lines.append(
-            f'\\* _game {funcs.get_game_name(game)}_ `{game.count}/{game.limit}` /show\\_{game.id}')
-
-    # TODO: Move the code to the funcs module.
-    # TODO: Add emoji.
-    text = f'*Games*\n\n' + '\n'.join(game_lines)
-
-    bot.send_message(
-        chat_id=chat_id,
-        parse_mode=telegram.parsemode.ParseMode.MARKDOWN_V2,
-        text=text,
-    )
-
-
-@dramatiq.actor(max_retries=5)
-def send_game_to_telegram(chat_id, game_id):
-    """Sends a message with a list of games in to a specific chat
-    """
-    game = funcs.get_game(game_id)
-
-    # TODO: Move the code to the funcs module.
-    # TODO: Delete only if 0 gamers
-    # TODO: Add emoji.
-    text = f'*Game {funcs.get_game_name(game)}*\n\n' \
-           f'_Players_: `{game.count}/{game.limit}`\n' \
-           f'_Size_: `{game.width}x{game.height}`\n' \
-           f'_Rate_: `{game.rate}pps`\n\n' \
-           f'/delete\\_{game.id}\n\n' \
-           f'[Play now\\!]({funcs.get_game_link(game)})\n\n' \
-           f'Back /list'
-
-    image_path = funcs.get_image_path(game_id,
-                                      (game.width, game.height),
-                                      settings.SCREENSHOT_SLUG_MEDIUM)
-    if Path(image_path).is_file():
-        bot.send_photo(
-            chat_id=chat_id,
-            photo=open(image_path, 'rb'),
-            caption=text,
-            parse_mode=telegram.parsemode.ParseMode.MARKDOWN_V2,
-        )
-    else:
-        bot.send_message(
-            chat_id=chat_id,
-            parse_mode=telegram.parsemode.ParseMode.MARKDOWN_V2,
-            text=text,
-            disable_web_page_preview='True',
-        )
-
-
-@dramatiq.actor(max_retries=5)
-def delete_game_from_telegram(chat_id, game_id):
-    deleted_game = funcs.delete_game(game_id)
-
-    text = f'Game was deleted {deleted_game.id}\n\n' \
-           '/list'
-
-    bot.send_message(
-        chat_id=chat_id,
-        parse_mode=telegram.parsemode.ParseMode.MARKDOWN_V2,
-        text=text,
-        disable_web_page_preview='True',
-    )
+    # TODO: Delete debug printing.
+    print('ACTOR', chat_id, cmd, args)
+    # TODO: Wrap invocation into try-except block.
+    tg_bot.handle(chat_id, cmd, args)

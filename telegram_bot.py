@@ -1,11 +1,11 @@
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters,\
-    PrefixHandler
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 
 import logging
 
 from lib import settings
-from lib.actors import send_games_list_to_telegram, send_game_to_telegram, \
-    delete_game_from_telegram
+from lib.actors import handle_telegram_update
+from lib.telegram.command import Command
+
 
 WELCOME_MESSAGE = 'Welcome!\nSend an image with some faces to begin'
 
@@ -15,17 +15,18 @@ logger.setLevel(settings.LOG_LEVEL)
 
 
 def start(update, context):
-    logger.info('Bot Started')
-    update.message.reply_text(WELCOME_MESSAGE)
+    chat_id = update.message.chat.id
+    handle_telegram_update.send(chat_id, Command.START)
 
 
-def help(update, context):
-    update.message.reply_text('Send an image with some faces to begin')
+def rules(update, context):
+    chat_id = update.message.chat.id
+    handle_telegram_update.send(chat_id, Command.RULES)
 
 
 def list_games(update, context):
-    print("ok", update.message.chat.id)
-    send_games_list_to_telegram.send(update.message.chat.id, 2, 3)
+    chat_id = update.message.chat.id
+    handle_telegram_update.send(chat_id, Command.LIST_GAMES)
 
 
 def error(update, context):
@@ -33,13 +34,10 @@ def error(update, context):
 
 
 def show(update, context):
-    print('update', update.message.text)
+    chat_id = update.message.chat.id
     _, game_id_str = update.message.text.split('_')
     game_id = int(game_id_str)
-
-    print(update, game_id)
-
-    send_game_to_telegram.send(update.message.chat.id, game_id)
+    handle_telegram_update.send(chat_id, Command.SHOW_GAME, game_id)
 
 
 def delete(update, context):
@@ -49,7 +47,7 @@ def delete(update, context):
 
     print(update, game_id)
 
-    delete_game_from_telegram.send(update.message.chat.id, game_id)
+    # delete_game_from_telegram.send(update.message.chat.id, game_id)
 
 
 def main():
@@ -63,9 +61,10 @@ def main():
 
     # Define command handlers
     dp.add_handler(CommandHandler('start', start))
-    dp.add_handler(CommandHandler('help', help))
+    dp.add_handler(CommandHandler('rules', rules))
     dp.add_handler(CommandHandler('list', list_games))
     dp.add_handler(MessageHandler(Filters.regex(r'^/show_[\d]+$'), show))
+
     dp.add_handler(MessageHandler(Filters.regex(r'^/delete_[\d]+$'), delete))
 
     # Log all errors
