@@ -1,23 +1,21 @@
 
 # Snake-Backend
 
-*In process of development*
+*WIP*
 
-The Snake-Backend does backend operations with the Snake-Server.
+Snake-Backend performs background operations with [Snake-Server](https://github.com/ivan1993spb/snake-server).
 
-See the Snake-Server source code here: https://github.com/ivan1993spb/snake-server
-
-Try out the game: http://snakeonline.xyz/
+See: https://snakeonline.xyz/
 
 ## How to start the backend
 
-1. Setup environment:
+1. Setup envs:
     ```bash
     echo "SNAKE_API_ADDRESS=https://snakeonline.xyz/api" > .env
     ```
-2. Start a redis instance:
+2. Start Redis:
     ```bash
-    docker run --name redis --rm -d -p 6379:6379 redis:5.0-alpine
+    docker run --name redis --rm -d -p 6379:6379 redis
     ```
 3. Start workers. You have to start at least one:
     ```bash
@@ -33,10 +31,9 @@ Try out the game: http://snakeonline.xyz/
 - Working with server API via CLI interface
   * [ ] Show basic information about server
 - Bots features
-  * [ ] Start a swarm of bots
-  * [ ] Stream game replays
+  * [ ] Manage a swarm of bots
 - Work with games
-  * [ ] Create and delete games by schedule - game rotation
+  * [ ] Create and delete games by schedule
   * [ ] Mass game creation
   * [ ] Export and import map proportions
 - Generating images of maps
@@ -51,7 +48,7 @@ Try out the game: http://snakeonline.xyz/
 
 ## Requirements
 
-- the Snake-Server >= v4.3.0
+- Snake-Server >= v4.3.0
 
 ## License
 
