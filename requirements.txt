@@ -15,7 +15,7 @@ prometheus-client==0.7.1
 pydantic==1.9.1
 python-dotenv==0.10.5
 pytz==2019.3
-PyYAML==5.3
+PyYAML==5.4
 redis==3.3.11
 requests==2.22.0
 six==1.14.0
