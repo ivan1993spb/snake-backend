@@ -6,11 +6,9 @@ import os
 import os.path
 import json
 import itertools
-from typing import List, Tuple, Dict, Union
-from urllib.parse import urlparse, urlunparse
+from typing import List, Tuple, Dict
 
 from PIL import Image
-from num2words import num2words
 
 from lib.api import APIClient
 from lib import settings
@@ -256,18 +254,3 @@ def delete_game(game_id: int) -> DeletedGame:
     client = get_api_client()
     deleted_game = client.delete_game(game_id)
     return deleted_game
-
-
-def get_game_link(game: Game) -> str:
-    """Compounds a link for a given game.
-    """
-    (scheme, netloc, path, params, query, _) = \
-        urlparse(settings.SNAKE_CLIENT_URL)
-    fragment = f'/games/{game.id}/play'
-    return urlunparse((scheme, netloc, path, params, query, fragment))
-
-
-def get_game_name(game: Union[Game, DeletedGame]) -> str:
-    """Returns string name of a given game
-    """
-    return num2words(game.id)

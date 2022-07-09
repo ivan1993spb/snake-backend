@@ -13,7 +13,7 @@ Try out the game: http://snakeonline.xyz/
 
 1. Setup environment:
     ```bash
-    echo "SNAKE_API_ADDRESS=http://snakeonline.xyz/api" > .env
+    echo "SNAKE_API_ADDRESS=https://snakeonline.xyz/api" > .env
     ```
 2. Start a redis instance:
     ```bash
@@ -25,7 +25,7 @@ Try out the game: http://snakeonline.xyz/
     ```
 4. Start a scheduler:
     ```bash
-    python app.py
+    python scheduler.py
     ```
 
 ## Features

@@ -12,12 +12,14 @@ numpy==1.18.1
 pathtools==0.1.2
 Pillow==7.0.0
 prometheus-client==0.7.1
+pydantic==1.9.1
 python-dotenv==0.10.5
 pytz==2019.3
 PyYAML==5.3
 redis==3.3.11
 requests==2.22.0
 six==1.14.0
+typing-extensions==4.3.0
 tzlocal==2.0.0
 urllib3==1.25.8
 watchdog==0.8.3

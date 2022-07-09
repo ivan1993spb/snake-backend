@@ -21,15 +21,11 @@ from dramatiq.rate_limits.backends import (
 )
 from dramatiq.results import Results, ResultBackend
 from dramatiq.middleware import Prometheus
-import telegram
 from pydantic import ValidationError
-import redis
 
 from lib import settings
 from lib import funcs
 from lib.api import APIError
-from lib.telegram import TelegramBot
-from lib.telegram.command import Command
 
 
 logger = logging.getLogger(__name__)
@@ -69,10 +65,6 @@ dramatiq.set_broker(broker=broker)
 DISTRIBUTED_MUTEX_REPORT = ConcurrentRateLimiter(rate_limits_backend,
                                                  "distributed-mutex-report",
                                                  limit=1)
-
-bot = telegram.Bot(token=settings.TELEGRAM_TOKEN)
-redis_client = redis.Redis.from_url(url=settings.TELEGRAM_REDIS_URL)
-tg_bot = TelegramBot(bot, redis_client)
 
 
 @dramatiq.actor(max_retries=0, store_results=True)
@@ -150,19 +142,3 @@ def delete_expired_screenshots_cache():
         exclude_screenshots = funcs.get_latest_screenshots_file_names()
 
     funcs.delete_screenshots(exclude_screenshots)
-
-
-@dramatiq.actor(max_retries=5)
-def handle_telegram_update(chat_id: int, cmd: Command, *args):
-    """Handles an update from telegram chat with a given identifier
-    command and arguments
-
-    Parameters:
-      chat_id: a telegram chat identifier
-      cmd: passed command
-      args: command arguments
-    """
-    # TODO: Delete debug printing.
-    print('ACTOR', chat_id, cmd, args)
-    # TODO: Wrap invocation into try-except block.
-    tg_bot.handle(chat_id, cmd, args)
