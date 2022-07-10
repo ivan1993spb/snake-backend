@@ -142,3 +142,32 @@ def delete_expired_screenshots_cache():
         exclude_screenshots = funcs.get_latest_screenshots_file_names()
 
     funcs.delete_screenshots(exclude_screenshots)
+
+
+@dramatiq.actor(max_retries=1)
+def dispatch_deleting_empty_games():
+    """Dispatches deleting empty games
+    """
+    try:
+        games = funcs.get_games()
+        empty_games = list(filter(lambda game: game.is_empty(), games))
+        logger.debug('found %d empty games', len(empty_games))
+        for game in empty_games:
+            delete_game.send(game.id)
+    except ValidationError as e:
+        logger.error('Parse error: %s', e)
+    except APIError as e:
+        logger.error('API response error: %s', e)
+
+
+@dramatiq.actor(max_retries=1)
+def delete_game(game_id: int):
+    """Deletes a game
+    """
+    logger.debug('deleting game id=%d', game_id)
+    try:
+        funcs.delete_game(game_id)
+    except ValidationError as e:
+        logger.error('Parse error: %s', e)
+    except APIError as e:
+        logger.error('API response error: %s', e)

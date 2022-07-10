@@ -13,6 +13,7 @@ from lib.actors import (
     dispatch_taking_screenshots,
     write_games_screenshots_json_report,
     delete_expired_screenshots_cache,
+    dispatch_deleting_empty_games,
 )
 
 
@@ -41,6 +42,11 @@ def run_scheduler():
         delete_expired_screenshots_cache.send,
         IntervalTrigger(seconds=settings.TASK_INTERVAL_DELETE_CACHE),
         name="delete_expired_screenshots_cache",
+    )
+    scheduler.add_job(
+        dispatch_deleting_empty_games.send,
+        IntervalTrigger(seconds=settings.TASK_INTERVAL_CLEANUP_GAMES),
+        name="dispatch_cleaning_up_games",
     )
     try:
         logger.info("Start scheduler")
