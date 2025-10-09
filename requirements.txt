@@ -9,7 +9,7 @@ dramatiq==1.7.0
 environs==7.1.0
 gevent==1.4.0
 greenlet==0.4.15
-idna==2.8
+idna==3.7
 isort==5.10.1
 lazy-object-proxy==1.7.1
 marshmallow==3.3.0
