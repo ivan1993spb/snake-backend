@@ -230,7 +230,7 @@ class Screenshot:
 
     COLOR_BACKGROUND: ColorRGB = BLACK_COLOR
     BORDER_SIZE = 2
-    COLOR_BORDER: ColorRGB = (0x0, 0x11, 0x0)
+    COLOR_BORDER: ColorRGB = (0x33, 0x44, 0x33)
     COLOR_GRID: ColorRGB = (0x0, 0x22, 0x0)
 
     def __init__(self,
