@@ -16,7 +16,7 @@ marshmallow==3.3.0
 mccabe==0.6.1
 numpy==1.23.1
 pathtools==0.1.2
-Pillow==9.2.0
+Pillow==10.3.0
 platformdirs==2.5.2
 prometheus-client==0.7.1
 pycodestyle==2.8.0
