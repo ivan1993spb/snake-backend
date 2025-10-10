@@ -1,4 +1,4 @@
-FROM python:3.8-alpine3.10
+FROM python:3.12.11-alpine3.22
 
 ENV PYTHONUNBUFFERED=1 \
     LIBRARY_PATH=/lib:/usr/lib
