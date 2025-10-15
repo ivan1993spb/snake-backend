@@ -20,7 +20,6 @@ from dramatiq.rate_limits.backends import (
     StubBackend as RateLimitsStubBackend,
 )
 from dramatiq.results import Results, ResultBackend
-from dramatiq.middleware import Prometheus
 from pydantic import ValidationError
 
 from lib import settings
@@ -52,12 +51,6 @@ else:
 
 results = Results(backend=result_backend)
 broker.add_middleware(results)
-
-if settings.PROMETHEUS_METRICS_SERVER_ENABLE:
-    broker.add_middleware(Prometheus(
-        http_host=settings.PROMETHEUS_METRICS_LISTEN_HOST,
-        http_port=settings.PROMETHEUS_METRICS_LISTEN_PORT,
-    ))
 
 dramatiq.set_broker(broker=broker)
 
