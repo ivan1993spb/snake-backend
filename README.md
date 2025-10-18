@@ -1,23 +1,33 @@
 
 # Snake-Backend
 
-*WIP*
+Snake-Backend performs background operations for the [Snake-Server](https://github.com/ivan1993spb/snake-server).
 
-Snake-Backend performs background operations with [Snake-Server](https://github.com/ivan1993spb/snake-server).
+## Start
 
-See: https://snakeonline.xyz/
+1. Environment variables:
+    ```
+    SNAKE_API_ADDRESS=https://snakeonline.xyz/api
+    LOG_LEVEL=DEBUG
+    BROKER_REDIS_URL=redis://localhost:6379/0
+    RESULT_REDIS_URL=redis://localhost:6379/1
+    RATE_LIMITS_REDIS_URL=redis://localhost:6379/2
+    ```
+    For Prometheus:
+    ```
+    # Defaults:
+    dramatiq_prom_host=0.0.0.0
+    dramatiq_prom_port=9191
 
-## How to start the backend
-
-1. Setup envs:
-    ```bash
-    echo "SNAKE_API_ADDRESS=https://snakeonline.xyz/api" > .env
+    # The path to store the prometheus database files.
+    # Might be required to mount a volume if using Docker.
+    dramatiq_prom_db=/path/to/prom/db
     ```
 2. Start Redis:
     ```bash
     docker run --name redis --rm -d -p 6379:6379 redis
     ```
-3. Start workers. You have to start at least one:
+3. Start workers. It also starts the dramatiq prometheus exporter.
     ```bash
     dramatiq lib.actors
     ```
@@ -26,30 +36,34 @@ See: https://snakeonline.xyz/
     python scheduler.py
     ```
 
-## Features
-
-- Working with server API via CLI interface
-  * [ ] Show basic information about server
-- Bots features
-  * [ ] Manage a swarm of bots
-- Work with games
-  * [ ] Create and delete games by schedule
-  * [ ] Mass game creation
-  * [ ] Export and import map proportions
-- Generating images of maps
-  * [x] Daemon - walk through games and generate images
-    + [x] By schedule
-
 ## Game screenshots
 
-![examples/g8s75x25-big.jpeg](examples/g8s75x25-big.jpeg)
+Big:
+
+![examples/g1s102x79-big.jpeg](examples/g1s102x79-big.jpeg)
+
+Medium:
+
+![examples/g1s102x79-medium.jpeg](examples/g1s102x79-medium.jpeg)
+
+Small:
+
+![examples/g1s102x79-small.jpeg](examples/g1s102x79-small.jpeg)
+
+Tiny:
+
+![examples/g1s102x79-tiny.jpeg](examples/g1s102x79-tiny.jpeg)
 
 [More screenshot examples here](examples)
 
-## Requirements
+## TODOs
 
-- Snake-Server >= v4.3.0
+- Interract with the server API via CLI interface
+- Manage games
+  * Manage bots
+  * Create and delete games by schedule
+  * Export and import map proportions
 
 ## License
 
-See [LICENSE](LICENSE).
+See [LICENSE](LICENSE)
